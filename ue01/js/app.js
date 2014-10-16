@@ -2,89 +2,136 @@
  * @author Sebastian Dass&eacute;
  */
 
-// TODO cache selected elements
+"use strict"
 
-window.onload = function (argument) {
-    var btnPlayPause = document.getElementById("btn_play_pause")
-    var btnStop = document.getElementById("btn_stop");
+window.onload = function() {
+    
+    // cache selected elements
     var player = document.getElementById("video_player");
-    var btnFullscreen = document.getElementById("btn_fullscreen");
-    var progressBar = document.getElementById("progress_bar_container");
+    var progressBarContainer = document.getElementById("progress_bar_container");
     var progress = document.getElementById("progress");
+    var btnPlayPause = document.getElementById("btn_play_pause");
+    var btnStop = document.getElementById("btn_stop");
+    var btnFullscreen = document.getElementById("btn_fullscreen");
     var textCurrentTime = document.getElementById("text_current_time");
-    // defaultProgressBar.getElementById("default_progress_bar");
     
-    
-    btnPlayPause.addEventListener("click", togglePlayPause(player, btnPlayPause));
-    btnStop.addEventListener("click", stop(player, btnPlayPause));
-    player.addEventListener("timeupdate", updateProgress(player, progress, textCurrentTime));
-    btnFullscreen.addEventListener("click", toggleFullscreen);
-    progressBar.addEventListener("mousedown", progressCtrl);
-    // var defaultProgressBar.addEventListener("click", progressCtrl);
+    // setup controller
+    var ctrl = Ctrl(player, btnPlayPause, progressBarContainer, progress, textCurrentTime);
 
-    updateProgress(player, progress, textCurrentTime)();
+    // add listeners
+    player.addEventListener("timeupdate", ctrl.updateProgress);
+    progressBarContainer.addEventListener("mousedown", ctrl.progressCtrl);
+    btnPlayPause.addEventListener("click", ctrl.togglePlayPause);
+    btnStop.addEventListener("click", ctrl.stop);
+    btnFullscreen.addEventListener("click", ctrl.toggleFullscreen);
+    document.addEventListener("keydown", ctrl.keyListener);
+    document.addEventListener("click", function() { document.activeElement.blur(); }); // to allow keyboard control with SPACE and ENTER
+
+    
+    ctrl.updateProgress();
+
     console.log("app loaded");
 };
 
-var togglePlayPause = function(player, btnPlayPause) {
-    return function() {
+
+var Ctrl = function(player, btnPlayPause, progressBarContainer, progress, textCurrentTime) {
+    
+    var _playerDuration = player.duration;
+    var _progressBarWidth = progressBarContainer.offsetWidth;
+    var _progressBarOffsetLeft = progressBarContainer.offsetLeft;
+
+    var _BACKSPACE = 8, 
+        _ENTER = 13, 
+        _SPACE = 32, 
+        _LEFT_ARROW = 37, 
+        _RIGHT_ARROW = 39;
+    
+    var _followTheCursor = function(evt) {
+        player.currentTime = _playerDuration * (evt.pageX - _progressBarOffsetLeft) / _progressBarWidth;
+        updateProgress();
+    };
+
+    var _dontFollowTheCursor = function(evt) {
+        progressBarContainer.removeEventListener("mousemove", _followTheCursor)
+    };
+
+
+    var togglePlayPause = function() {
         if (player.paused) {
             player.play();
             btnPlayPause.textContent = "Pause";
-            console.log("video playing");
         } else {
             player.pause()
             btnPlayPause.textContent = "Play";
-            console.log("video paused");
         }
     };
-};
 
-var stop = function(player, btnPlayPause) {
-    return function() {
+    var stop = function() {
         player.pause();
         player.currentTime = 0;
         btnPlayPause.textContent = "Play";
-        console.log("video stopped");
     };
-};
 
-var updateProgress = function(player, progress, textCurrentTime) {
-    return function() {
-        var progressInPercent = Math.floor(100 * player.currentTime / player.duration);
-        /*var defaultProgressBar = document.getElementById("default_progress_bar");
-        defaultProgressBar.value = progressInPercent;
-        defaultProgressBar.getElementsByTagName("span")[0].innerHTML = Math.floor(progressInPercent);*/
+    var updateProgress = function() {
+        var progressInPercent = Math.floor(100 * player.currentTime / _playerDuration);
         progress.style.width = progressInPercent + "%";
         textCurrentTime.innerHTML = new Date(player.currentTime * 1000).toUTCString().split(" ")[4];
-        if (player.currentTime === player.duration) {
-            var btn = document.getElementById("btn_play_pause");
-            btn.textContent = "Play";
+        if (player.currentTime === _playerDuration) {
+            btnPlayPause.textContent = "Play";
         }
     };
-};
 
-var progressCtrl = function(evt) {
-    progressCtrl2(evt);
-    var progressbar = document.getElementById("progress_bar_container");
-    progressbar.addEventListener("mousemove", progressCtrl2);
-    progressbar.addEventListener("mouseup", function() {
-        progressbar.removeEventListener("mousemove", progressCtrl2)
-    });
-};
+    var progressCtrl = function(evt) {
+        _followTheCursor(evt);
+        progressBarContainer.addEventListener("mousemove", _followTheCursor);
+        progressBarContainer.addEventListener("mouseup", _dontFollowTheCursor);
+        document.addEventListener("mouseup", _dontFollowTheCursor);
+    };
 
-var progressCtrl2 = function(evt) {
-    var el = document.getElementById("progress_bar_container")
-    var width = el.offsetWidth;
-    var offset = el.offsetLeft;
-    var relativeX = evt.pageX - offset;
-    var normalizedX = relativeX / width;
+    var toggleFullscreen = function() {
+        if (player.requestFullScreen) {
+            !document.fullScreen ? player.requestFullScreen() : document.exitFullScreen();
+        } else if (player.mozRequestFullScreen) {
+            !document.mozFullScreen ? player.mozRequestFullScreen() : document.mozCancelFullScreen();
+        } else if (player.webkitRequestFullScreen) {
+            !document.webkitIsFullScreen ? player.webkitRequestFullScreen() : document.webkitCancelFullScreen();
+        } else {
+            console.log("Your browser does not support full screen mode.");
+        }
+    };
 
-    var player = document.getElementById("video_player");
-    player.currentTime = normalizedX * player.duration;
-    updateProgress();
-};
+    var keyListener = function(evt) {
+        // console.log("key '" + evt.keyCode + "' pressed");
+        switch (evt.keyCode) {
+            case _SPACE: 
+                togglePlayPause();
+                break;
+            case _BACKSPACE:
+                stop();
+                break;
+            case _ENTER:
+                if (player.paused) {
+                    player.currentTime = 0;
+                    togglePlayPause();
+                } else {
+                    stop();
+                }
+                break;
+            case _LEFT_ARROW:
+                player.currentTime -= 1;
+                break;
+            case _RIGHT_ARROW:
+                player.currentTime += 1;
+                break;
+        }
+    };
 
-var toggleFullscreen = function() {
-    console.warn("toggleFullscreen not implemented yet")
+    return {
+        togglePlayPause: togglePlayPause, 
+        stop: stop, 
+        updateProgress: updateProgress, 
+        progressCtrl: progressCtrl, 
+        toggleFullscreen: toggleFullscreen, 
+        keyListener: keyListener
+    }
 };

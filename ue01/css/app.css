@@ -2,16 +2,19 @@
  * @author Sebastian Dass&eacute;
  */
 
-video {
+#video_container {
     display: inline-block;
     width: 40%;
+    vertical-align: middle;
+}
+
+#video_player {
+    width: 100%;
     /*filter: grayscale(50%);*/
 }
 
 #video_controls {
-    display: inline-block;
-    width: 40%;
-    /*line-height: 100px;*/
+    width: 100%;
 }
 
 #video_controls button {
@@ -20,11 +23,6 @@ video {
     font-size: large;
 }
 
-/*#default_progress_bar {
-    width: 100%;
-    height: 2em;
-}*/
-
 #text_current_time {
     display: inline-block;
     width: 20%;
@@ -32,21 +30,15 @@ video {
     text-align: center;
 }
 
-#progress_bar_container {
-    font-size: xx-large;
-    color: #ffffff; // white
-    text-align: center;
-}
-
 #progress_bar {
     width: 100%;
-    height: 1.5em;
+    height: 2em;
     border: 1px solid #aaa; 
-    background-color: #000000; // black
+    background-color: #000000;
 }
 
 #progress {
     display: inline-block;
     height: 100%;
-    background-color: #00aa00; // green
+    background-color: #00aa00;
 }

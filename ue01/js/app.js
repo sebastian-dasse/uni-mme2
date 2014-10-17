@@ -101,11 +101,10 @@ var Ctrl = function(player, btnPlayPause, progressBarContainer, progress, textCu
         var executekeyActionForKey = {
             8:  stop, // BACKSPACE
             13: function() { // ENTER
-                    if (player.paused) {
-                        player.currentTime = 0;
+                    var wasStoppedAlready = player.currentTime < 0.1;
+                    stop();
+                    if (wasStoppedAlready) {
                         togglePlayPause();
-                    } else {
-                        stop();
                     }
                 }, 
             32: togglePlayPause, // SPACE

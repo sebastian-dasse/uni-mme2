@@ -26,11 +26,10 @@ window.onload = function() {
     btnFullscreen.addEventListener("click", ctrl.toggleFullscreen);
     document.addEventListener("keydown", ctrl.keyListener);
     document.addEventListener("click", function() { document.activeElement.blur(); }); // to allow keyboard control with SPACE and ENTER
-
     
     ctrl.updateProgress();
 
-    console.log("app loaded");
+    console.log("app loaded %o", document.body);
 };
 
 
@@ -40,11 +39,6 @@ var Ctrl = function(player, btnPlayPause, progressBarContainer, progress, textCu
     var _progressBarWidth = progressBarContainer.offsetWidth;
     var _progressBarOffsetLeft = progressBarContainer.offsetLeft;
 
-    var _BACKSPACE = 8, 
-        _ENTER = 13, 
-        _SPACE = 32, 
-        _LEFT_ARROW = 37, 
-        _RIGHT_ARROW = 39;
     
     var _followTheCursor = function(evt) {
         player.currentTime = _playerDuration * (evt.pageX - _progressBarOffsetLeft) / _progressBarWidth;
@@ -101,29 +95,24 @@ var Ctrl = function(player, btnPlayPause, progressBarContainer, progress, textCu
     };
 
     var keyListener = function(evt) {
-        // console.log("key '" + evt.keyCode + "' pressed");
-        switch (evt.keyCode) {
-            case _SPACE: 
-                togglePlayPause();
-                break;
-            case _BACKSPACE:
-                stop();
-                break;
-            case _ENTER:
-                if (player.paused) {
-                    player.currentTime = 0;
-                    togglePlayPause();
-                } else {
-                    stop();
-                }
-                break;
-            case _LEFT_ARROW:
-                player.currentTime -= 1;
-                break;
-            case _RIGHT_ARROW:
-                player.currentTime += 1;
-                break;
-        }
+        var doNothing = function() {
+            // console.debug("The key with key code '" + keyCode + "'' is not mapped to a function.");
+        };
+        var executekeyActionForKey = {
+            8:  stop, // BACKSPACE
+            13: function() { // ENTER
+                    if (player.paused) {
+                        player.currentTime = 0;
+                        togglePlayPause();
+                    } else {
+                        stop();
+                    }
+                }, 
+            32: togglePlayPause, // SPACE
+            37: function() { player.currentTime -= 1; }, // LEFT_ARROW
+            39: function() { player.currentTime += 1; } // RIGHT_ARROW
+        };
+        (executekeyActionForKey[evt.keyCode] || doNothing)();
     };
 
     return {

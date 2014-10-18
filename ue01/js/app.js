@@ -20,18 +20,19 @@ var Ctrl = function(Util) {
     var DBL_CLICK_DELAY = 250;
 
     // cache selected elements
-    var video = document.getElementById("video_player");
-    var progressBar = document.getElementById("progress_bar");
-    var progress = document.getElementById("progress_bar_progress");
-    var btnPlayPause = document.getElementById("btn_play_pause");
-    var btnStop = document.getElementById("btn_stop");
-    var btnFullscreen = document.getElementById("btn_fullscreen");
-    var textCurrentTime = document.getElementById("text_current_time");
-    var filterCtrl = document.getElementById("filter_controls");
-    var btnBlur = document.getElementById("btn_blur");
-    var btnGrayscale = document.getElementById("btn_grayscale");
-    var btnFalsecolor = document.getElementById("btn_falsecolor");
-    var btnFilterOff = document.getElementById("btn_filter_off");
+    var video = document.getElementById("video_player"), 
+        progressBar = document.getElementById("progress_bar"), 
+        progress = document.getElementById("progress_bar_progress"), 
+        btnPlayPause = document.getElementById("btn_play_pause"), 
+        btnStop = document.getElementById("btn_stop"), 
+        btnFullscreen = document.getElementById("btn_fullscreen"), 
+        textCurrentTime = document.getElementById("text_current_time"), 
+        filterCtrl = document.getElementById("filter_controls"), 
+        filterCtrlBtns = document.getElementById("filter_controls").children, 
+        btnFilterOff = document.getElementById("btn_filter_off"), 
+        btnGrayscale = document.getElementById("btn_filter_grayscale"), 
+        btnFalsecolor = document.getElementById("btn_filter_falsecolor"), 
+        btnBlur = document.getElementById("btn_filter_blur");
     
     var _followTheCursor = function(evt) {
         video.currentTime = video.duration * (evt.pageX - progressBar.offsetLeft) / progressBar.offsetWidth;
@@ -65,7 +66,7 @@ var Ctrl = function(Util) {
         var progressInPercent = Math.floor(100 * video.currentTime / video.duration);
         progress.style.width = progressInPercent + "%";
         textCurrentTime.innerHTML = new Date(video.currentTime * 1000).toUTCString().split(" ")[4];
-        if (video.currentTime === video.duration) {
+        if (video.paused) {
             btnPlayPause.textContent = "Play";
         }
     };
@@ -89,6 +90,18 @@ var Ctrl = function(Util) {
         }
     };
 
+    var applyFilter = function(filterName) {
+        var selected = filterCtrlBtns["btn_filter_" + filterName], 
+            disableSelectedBtn = function() {
+                Util.disableSelectedBtn(filterCtrlBtns)(selected);
+            };
+        filterName = (filterName === "off") ? "" : filterName;
+        return function() {
+            video.className = filterName;
+            disableSelectedBtn();
+        }
+    };
+
     var keyListener = function(evt) {
         var actionForKey = {
             8:  stop, // BACKSPACE
@@ -102,14 +115,14 @@ var Ctrl = function(Util) {
             32: togglePlayPause, // SPACE
             37: function() { video.currentTime -= 1; }, // LEFT_ARROW
             39: function() { video.currentTime += 1; }, // RIGHT_ARROW
-            86: function() { console.log(video); } // v
+            71: function() { applyFilter("grayscale")(); }, // g
+            70: function() { applyFilter("falsecolor")(); }, // f
+            66: function() { applyFilter("blur")(); }, // b
+            79: function() { applyFilter("off")(); }, // o
+            220: function() { console.log(document.body); } // ^  -  for debugging
         };
         var execute = actionForKey[evt.keyCode] || _doNothing;
         execute();
-    };
-
-    var applyFilter = function(filterName) {
-        return function() { video.className = (filterName === "off") ? "" : filterName; }
     };
 
     
@@ -140,9 +153,8 @@ var Ctrl = function(Util) {
         btnGrayscale.addEventListener("click", applyFilter("grayscale"));
         btnFilterOff.addEventListener("click", applyFilter("off"));
 
+        // initialize settings
         updateProgress();
-
-        filterCtrl.addEventListener("click", Util.onClickMarkButtonAsSelected(filterCtrl.children));
         btnFilterOff.disabled = true;
 
         console.log("controller set up")
@@ -159,13 +171,17 @@ var Ctrl = function(Util) {
  */
 var Util = (function() {
     var u = {};
-    u.onClickMarkButtonAsSelected = function(btns) {
+
+    // can be called with a button or used as event listener
+    u.disableSelectedBtn = function(btns) {
         return function(evt) {
+            var selected = evt.target || evt;
             for (var i = 0; i < btns.length; i++) {
                 // console.log("btn %d = %o", i, btns[i]);
-                btns[i].disabled = (btns[i] === evt.target) ? true : false;
+                btns[i].disabled = (btns[i] === selected) ? true : false;
             }
         };
     };
+
     return u;
 }());

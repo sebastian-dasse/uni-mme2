@@ -2,6 +2,21 @@
  * @author Sebastian Dass&eacute;
  */
 
+.grayscale {
+    -webkit-filter: grayscale(100%); /* for Chrome */
+    filter: url('filter.svg#grayscale'); /* for Firefox */
+}
+
+.falsecolor {
+    -webkit-filter: hue-rotate(-30deg); /* for Chrome */
+    filter: url('filter.svg#falsecolor'); /* for Firefox */
+}
+
+.blur {
+    -webkit-filter: blur(2px); /* for Chrome */
+    filter: url('filter.svg#blur'); /* for Firefox */
+}
+
 #video_container {
     display: inline-block;
     width: 40%;
@@ -10,14 +25,6 @@
 
 #video_player {
     width: 100%;
-    /*display: none;*/
-}
-
-#video_canvas {
-    /*display: inline-block;*/
-    /*width: 100%;*/
-    width: 43%;
-    position: fixed;
 }
 
 #video_controls {
@@ -26,6 +33,12 @@
 
 #video_controls button {
     width: 26%;
+    height: 3em;
+    font-size: large;
+}
+
+#filter_controls button {
+    width: 24.5%;
     height: 3em;
     font-size: large;
 }

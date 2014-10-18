@@ -5,7 +5,20 @@
 "use strict"
 
 window.onload = function() {
-    
+    var ctrl = Ctrl(Util);
+    ctrl.setup();
+
+    console.log("app loaded %o", document.body);
+};
+
+
+/**
+ * the central controller for this app
+ */
+var Ctrl = function(Util) {
+
+    var DBL_CLICK_DELAY = 250;
+
     // cache selected elements
     var video = document.getElementById("video_player");
     var progressBar = document.getElementById("progress_bar");
@@ -14,56 +27,22 @@ window.onload = function() {
     var btnStop = document.getElementById("btn_stop");
     var btnFullscreen = document.getElementById("btn_fullscreen");
     var textCurrentTime = document.getElementById("text_current_time");
-    
-    // setup controller
-    var ctrl = Ctrl(video, btnPlayPause, progressBar, progress, textCurrentTime);
-
-    // setup the canvas for the filtered video
-    setupCanvas(video);
-    // console.log("crossOrigin = '" + video.crossOrigin + "'");
-    console.log("... = '%o'", video);
-
-    // add listeners
-    video.addEventListener("timeupdate", ctrl.updateProgress);
-    progressBar.addEventListener("mousedown", ctrl.progressCtrl);
-    btnPlayPause.addEventListener("click", ctrl.togglePlayPause);
-    btnStop.addEventListener("click", ctrl.stop);
-    btnFullscreen.addEventListener("click", ctrl.toggleFullscreen);
-
-    var dblClicked = false;
-    var DBL_CLICK_DELAY = 250;
-    video.addEventListener("click", function() { setTimeout(function() { !dblClicked && ctrl.togglePlayPause(); }, DBL_CLICK_DELAY) });
-    video.addEventListener("dblclick", function() {
-        dblClicked = true;
-        ctrl.toggleFullscreen();
-        setTimeout(function() { dblClicked = false; }, DBL_CLICK_DELAY);
-    });
-
-    document.addEventListener("keydown", ctrl.keyListener);
-    document.addEventListener("click", function() { document.activeElement.blur(); }); // to allow keyboard control with SPACE and ENTER
-    
-
-    ctrl.updateProgress();
-
-    console.log("app loaded %o", document.body);
-};
-
-
-var Ctrl = function(video, btnPlayPause, progressBar, progress, textCurrentTime) {
-    
-    var _videoDuration = video.duration;
-    var _progressBarWidth = progressBar.offsetWidth;
-    var _progressBarOffsetLeft = progressBar.offsetLeft;
-
+    var filterCtrl = document.getElementById("filter_controls");
+    var btnBlur = document.getElementById("btn_blur");
+    var btnGrayscale = document.getElementById("btn_grayscale");
+    var btnFalsecolor = document.getElementById("btn_falsecolor");
+    var btnFilterOff = document.getElementById("btn_filter_off");
     
     var _followTheCursor = function(evt) {
-        video.currentTime = _videoDuration * (evt.pageX - _progressBarOffsetLeft) / _progressBarWidth;
+        video.currentTime = video.duration * (evt.pageX - progressBar.offsetLeft) / progressBar.offsetWidth;
         updateProgress();
     };
 
     var _dontFollowTheCursor = function(evt) {
         progressBar.removeEventListener("mousemove", _followTheCursor)
     };
+
+    var _doNothing = function() {};
 
 
     var togglePlayPause = function() {
@@ -83,10 +62,10 @@ var Ctrl = function(video, btnPlayPause, progressBar, progress, textCurrentTime)
     };
 
     var updateProgress = function() {
-        var progressInPercent = Math.floor(100 * video.currentTime / _videoDuration);
+        var progressInPercent = Math.floor(100 * video.currentTime / video.duration);
         progress.style.width = progressInPercent + "%";
         textCurrentTime.innerHTML = new Date(video.currentTime * 1000).toUTCString().split(" ")[4];
-        if (video.currentTime === _videoDuration) {
+        if (video.currentTime === video.duration) {
             btnPlayPause.textContent = "Play";
         }
     };
@@ -111,10 +90,7 @@ var Ctrl = function(video, btnPlayPause, progressBar, progress, textCurrentTime)
     };
 
     var keyListener = function(evt) {
-        var doNothing = function() {
-            // console.log("The key with key code '" + keyCode + "'' is not mapped to a function.");
-        };
-        var executekeyActionForKey = {
+        var actionForKey = {
             8:  stop, // BACKSPACE
             13: function() { // ENTER
                     var wasStoppedAlready = video.currentTime < 0.1;
@@ -125,74 +101,71 @@ var Ctrl = function(video, btnPlayPause, progressBar, progress, textCurrentTime)
                 }, 
             32: togglePlayPause, // SPACE
             37: function() { video.currentTime -= 1; }, // LEFT_ARROW
-            39: function() { video.currentTime += 1; } // RIGHT_ARROW
+            39: function() { video.currentTime += 1; }, // RIGHT_ARROW
+            86: function() { console.log(video); } // v
         };
-        (executekeyActionForKey[evt.keyCode] || doNothing)();
+        var execute = actionForKey[evt.keyCode] || _doNothing;
+        execute();
     };
 
+    var applyFilter = function(filterName) {
+        return function() { video.className = (filterName === "off") ? "" : filterName; }
+    };
+
+    
+    /**
+     * set up all event listeners
+     */
+    var setup = function() {
+        video.addEventListener("timeupdate", updateProgress);
+        progressBar.addEventListener("mousedown", progressCtrl);
+        
+        btnPlayPause.addEventListener("click", togglePlayPause);
+        btnStop.addEventListener("click", stop);
+        btnFullscreen.addEventListener("click", toggleFullscreen);
+
+        var dblClicked = false;
+        video.addEventListener("click", function() { setTimeout(function() { !dblClicked && togglePlayPause(); }, DBL_CLICK_DELAY) });
+        video.addEventListener("dblclick", function() {
+            dblClicked = true;
+            toggleFullscreen();
+            setTimeout(function() { dblClicked = false; }, DBL_CLICK_DELAY);
+        });
+
+        document.addEventListener("keydown", keyListener);
+        document.addEventListener("click", function() { document.activeElement.blur(); }); // to allow keyboard control with SPACE and ENTER
+        
+        btnBlur.addEventListener("click", applyFilter("blur"));
+        btnFalsecolor.addEventListener("click", applyFilter("falsecolor"));
+        btnGrayscale.addEventListener("click", applyFilter("grayscale"));
+        btnFilterOff.addEventListener("click", applyFilter("off"));
+
+        updateProgress();
+
+        filterCtrl.addEventListener("click", Util.onClickMarkButtonAsSelected(filterCtrl.children));
+        btnFilterOff.disabled = true;
+
+        console.log("controller set up")
+    }
+
     return {
-        togglePlayPause: togglePlayPause, 
-        stop: stop, 
-        updateProgress: updateProgress, 
-        progressCtrl: progressCtrl, 
-        toggleFullscreen: toggleFullscreen, 
-        keyListener: keyListener
-    }
+        setup: setup
+    };
 };
 
-var setupCanvas = function(video) {
-    var canvas = document.getElementById("video_canvas");
 
-    // canvas.toDataURL();
-    // video.crossOrigin = "anonymous";
-
-    var canvas2DContext = canvas.getContext("2d");
-
-    canvas.width = video.clientWidth;
-    canvas.height = video.clientHeight;
-    // console.log(canvas);
-    // console.log(canvas2DContext);
-    
-    var filter = myFirstFilter; // TODO make filter settable via button
-
-    video.addEventListener("timeupdate", function() {
-        // paintCanvas(video, canvas, canvas2DContext, filter);
-        setInterval(function() { applyFilter(video, canvas, canvas2DContext, filter); }, 20);
-    });
-    
-    canvas2DContext.drawImage(video, 0, 0);
-    applyFilter(video, canvas, canvas2DContext, filter);
-};
-
-// var paintCanvas = function(video, canvas, canvas2DContext, filter) {
-//     // if (video.paused || video.ended) {
-//     //     return false;
-//     // }
-//     // canvas2DContext.drawImage(video, 0, 0);
-//     setInterval(function() { applyFilter(video, canvas, canvas2DContext, filter); }, 20);
-// };
-
-var applyFilter = function(video, canvas, canvas2DContext, filter) {
-    canvas2DContext.drawImage(video, 0, 0);
-    var imageData;
-    try {
-        imageData = canvas2DContext.getImageData(0, 0, canvas.width, canvas.height);
-        filter && filter(imageData);
-        canvas2DContext.putImageData(imageData, 0, 0);
-    } catch (e) {
-        // console.warn("caught: " + e);
-    }
-    // if (filter && imageData) {
-    //     filter(imageData);
-    //     canvas2DContext.putImageData(imageData, 0, 0);
-    // }
-};
-
-var myFirstFilter = function(imageData) {
-    var len = imageData.data.length;
-    for (var i = 0; i < len; i += 4) {
-        imageData.data[i] = 255 - imageData.data[i];
-        imageData.data[i+1] = 255 - imageData.data[i+1];
-        imageData.data[i+3] = imageData.data[i+3] - 100;
-    }
-}
+/**
+ * utility functions for this app
+ */
+var Util = (function() {
+    var u = {};
+    u.onClickMarkButtonAsSelected = function(btns) {
+        return function(evt) {
+            for (var i = 0; i < btns.length; i++) {
+                // console.log("btn %d = %o", i, btns[i]);
+                btns[i].disabled = (btns[i] === evt.target) ? true : false;
+            }
+        };
+    };
+    return u;
+}());

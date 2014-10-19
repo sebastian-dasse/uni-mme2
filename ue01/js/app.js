@@ -13,14 +13,14 @@ window.onload = function() {
 
 
 /**
- * the central controller for this app
+ * The central controller for this app
  */
 var Ctrl = function(Util) {
 
     var DBL_CLICK_DELAY = 250;
 
     // cache selected elements
-    var video = document.getElementById("video_player"), 
+    var video = document.getElementById("video"), 
         progressBar = document.getElementById("progress_bar"), 
         progress = document.getElementById("progress_bar_progress"), 
         btnPlayPause = document.getElementById("btn_play_pause"), 
@@ -155,7 +155,7 @@ var Ctrl = function(Util) {
 
         // initialize settings
         updateProgress();
-        btnFilterOff.disabled = true;
+        Util.disableSelectedBtn(filterCtrlBtns)(btnFilterOff);
 
         console.log("controller set up")
     }
@@ -167,18 +167,23 @@ var Ctrl = function(Util) {
 
 
 /**
- * utility functions for this app
+ * Utility functions for this app
  */
 var Util = (function() {
     var u = {};
 
-    // can be called with a button or used as event listener
+    /**
+     * Disables the selected button and ensures that all other buttons specified as btns are enabled. 
+     * Can be called with a button or used as event listener.
+     */
     u.disableSelectedBtn = function(btns) {
         return function(evt) {
             var selected = evt.target || evt;
             for (var i = 0; i < btns.length; i++) {
                 // console.log("btn %d = %o", i, btns[i]);
-                btns[i].disabled = (btns[i] === selected) ? true : false;
+                var isSel = (btns[i] === selected);
+                btns[i].disabled = isSel;
+                btns[i].style.cursor = isSel ? "default" : "pointer";
             }
         };
     };

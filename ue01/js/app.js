@@ -2,7 +2,7 @@
  * @author Sebastian Dass&eacute;
  */
 
-"use strict"
+"use strict";
 
 window.onload = function() {
     var ctrl = Ctrl(Util);
@@ -20,26 +20,25 @@ var Ctrl = function(Util) {
     var DBL_CLICK_DELAY = 250;
 
     // cache selected elements
-    var video = document.getElementById("video"), 
-        progressBar = document.getElementById("progress_bar"), 
-        progress = document.getElementById("progress_bar_progress"), 
-        btnPlayPause = document.getElementById("btn_play_pause"), 
-        btnStop = document.getElementById("btn_stop"), 
-        btnFullscreen = document.getElementById("btn_fullscreen"), 
-        textCurrentTime = document.getElementById("text_current_time"), 
-        filterCtrl = document.getElementById("filter_controls"), 
-        filterCtrlBtns = document.getElementById("filter_controls").children, 
-        btnFilterOff = document.getElementById("btn_filter_off"), 
-        btnGrayscale = document.getElementById("btn_filter_grayscale"), 
-        btnFalsecolor = document.getElementById("btn_filter_falsecolor"), 
+    var video = document.getElementById("video"),
+        progressBar = document.getElementById("progress_bar"),
+        progress = document.getElementById("progress_bar_progress"),
+        btnPlayPause = document.getElementById("btn_play_pause"),
+        btnStop = document.getElementById("btn_stop"),
+        btnFullscreen = document.getElementById("btn_fullscreen"),
+        textCurrentTime = document.getElementById("text_current_time"),
+        filterCtrlBtns = document.getElementById("filter_controls").children,
+        btnFilterOff = document.getElementById("btn_filter_off"),
+        btnGrayscale = document.getElementById("btn_filter_grayscale"),
+        btnFalsecolor = document.getElementById("btn_filter_falsecolor"),
         btnBlur = document.getElementById("btn_filter_blur");
-    
+
     var _followTheCursor = function(evt) {
         video.currentTime = video.duration * (evt.pageX - progressBar.offsetLeft) / progressBar.offsetWidth;
         updateProgress();
     };
 
-    var _dontFollowTheCursor = function(evt) {
+    var _dontFollowTheCursor = function() {
         progressBar.removeEventListener("mousemove", _followTheCursor)
     };
 
@@ -51,7 +50,7 @@ var Ctrl = function(Util) {
             video.play();
             btnPlayPause.textContent = "Pause";
         } else {
-            video.pause()
+            video.pause();
             btnPlayPause.textContent = "Play";
         }
     };
@@ -91,7 +90,7 @@ var Ctrl = function(Util) {
     };
 
     var applyFilter = function(filterName) {
-        var selected = filterCtrlBtns["btn_filter_" + filterName], 
+        var selected = filterCtrlBtns["btn_filter_" + filterName],
             disableSelectedBtn = function() {
                 Util.disableSelectedBtn(filterCtrlBtns)(selected);
             };
@@ -104,35 +103,29 @@ var Ctrl = function(Util) {
 
     var keyListener = function(evt) {
         var actionForKey = {
-            8:  stop, // BACKSPACE
-            13: function() { // ENTER
-                    var wasStoppedAlready = video.currentTime < 0.1;
-                    stop();
-                    if (wasStoppedAlready) {
-                        togglePlayPause();
-                    }
-                }, 
-            32: togglePlayPause, // SPACE
-            37: function() { video.currentTime -= 1; }, // LEFT_ARROW
-            39: function() { video.currentTime += 1; }, // RIGHT_ARROW
-            71: function() { applyFilter("grayscale")(); }, // g
-            70: function() { applyFilter("falsecolor")(); }, // f
-            66: function() { applyFilter("blur")(); }, // b
-            79: function() { applyFilter("off")(); }, // o
-            220: function() { console.log(document.body); } // ^  -  for debugging
-        };
-        var execute = actionForKey[evt.keyCode] || _doNothing;
+                "8": stop, // BACKSPACE
+                "13": function() { video.currentTime >= 0.1 ? stop() : togglePlayPause(); }, // ENTER
+                "32": togglePlayPause, // SPACE
+                "37": function() { video.currentTime -= 1; }, // LEFT_ARROW
+                "39": function() { video.currentTime += 1; }, // RIGHT_ARROW
+                "71": function() { applyFilter("grayscale")(); }, // g
+                "70": function() { applyFilter("falsecolor")(); }, // f
+                "66": function() { applyFilter("blur")(); }, // b
+                "79": function() { applyFilter("off")(); }, // o
+                "220": function() { console.log(document.body); } // ^  -  for debugging
+            },
+            execute = actionForKey[evt.keyCode] || _doNothing;
         execute();
     };
 
-    
+
     /**
      * set up all event listeners
      */
     var setup = function() {
         video.addEventListener("timeupdate", updateProgress);
         progressBar.addEventListener("mousedown", progressCtrl);
-        
+
         btnPlayPause.addEventListener("click", togglePlayPause);
         btnStop.addEventListener("click", stop);
         btnFullscreen.addEventListener("click", toggleFullscreen);
@@ -147,7 +140,7 @@ var Ctrl = function(Util) {
 
         document.addEventListener("keydown", keyListener);
         document.addEventListener("click", function() { document.activeElement.blur(); }); // to allow keyboard control with SPACE and ENTER
-        
+
         btnBlur.addEventListener("click", applyFilter("blur"));
         btnFalsecolor.addEventListener("click", applyFilter("falsecolor"));
         btnGrayscale.addEventListener("click", applyFilter("grayscale"));
@@ -158,7 +151,7 @@ var Ctrl = function(Util) {
         Util.disableSelectedBtn(filterCtrlBtns)(btnFilterOff);
 
         console.log("controller set up")
-    }
+    };
 
     return {
         setup: setup
@@ -173,7 +166,7 @@ var Util = (function() {
     var u = {};
 
     /**
-     * Disables the selected button and ensures that all other buttons specified as btns are enabled. 
+     * Disables the selected button and ensures that all other buttons specified as btns are enabled.
      * Can be called with a button or used as event listener.
      */
     u.disableSelectedBtn = function(btns) {

@@ -1,19 +1,35 @@
 -- Mozilla Firefox 32 --
 
-    -  
-    -  
+    - Steuerung per Progressbar funktioniert
+    - Steuerung per Click in Videoanzeige funktioniert
+    - Tastatursteuerung funktioniert
+    - Farbfilter-Effekte mit svg (filter: url('...svg#...'))
 
 -- Google Chrome 38 --
 
-    - 
-    - 
+    - Steuerung per Progressbar funktioniert
+    - Steuerung per Click in Videoanzeige funktioniert
+    - Tastatursteuerung funktioniert, Ausnahme: Backspace wechselt per Vorbelegung zur letzten Internetadresse
+    - im Fullscreen werden Standard-Steuerelemente angezeigt
+    - Farbfilter-Effekte mit css (-webkit-filter) 
+    - kleinere Schriftgrößen
 
--- Opera 12 --
+-- Opera 25 --
 
-    - 
-    - 
+    - Steuerung per Progressbar funktioniert
+    - zu Fullscreen wechseln per Click in Videoanzeige funktioniert
+    - Bug: Play/Pause per Click in Videoanzeige funktioniert nicht
+    - Tastatursteuerung funktioniert, Ausnahme: Backspace wechselt per Vorbelegung zur letzten Internetadresse
+    - im Fullscreen werden Standard-Steuerelemente angezeigt
+    - Farbfilter-Effekte mit css (-webkit-filter)
 
 -- Internet Explorer 11 --
 
-    - 
-    - 
+    - JavaScript standardmäßig geblockt und muss expizit zugelassen werden
+    - Steuerung per Progressbar funktioniert
+    - Steuerung per Click in Videoanzeige funktioniert
+    - Tastatursteuerung funktioniert, Ausnahme: Backspace wechselt per Vorbelegung zur letzten Internetadresse
+    - Bug: erkennt nicht, dass das Video bis zum Ende abgespielt wurde um den Toggle-Button wieder auf "Play" zu setzen
+    - kein Fullscreen
+    - keine Farbfilter-Effekte, weder mit css (-webkit-filter) noch mit svg (filter: url('...svg#...'))
+    - Linien sind dicker als in anderen Browsern

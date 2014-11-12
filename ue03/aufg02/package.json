@@ -1,0 +1,23 @@
+{
+  "name": "UE03-Aufg2",
+  "version": "0.0.0",
+  "description": "My first node project.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://cgmgit.beuth-hochschule.de/s50602/mme2-ue"
+  },
+  "author": "Sebastian Dassé",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.10.2"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}

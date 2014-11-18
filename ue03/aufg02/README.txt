@@ -1,7 +1,7 @@
 -- INSTALLATION INSTRUCTIONS --
 
 
-Before first run you will have to install the Express.js framework. To do so type:
+Before first run you will have to install the application. To do so type:
 
     npm install express --save
 

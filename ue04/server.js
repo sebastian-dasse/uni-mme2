@@ -8,19 +8,46 @@ app.get('/', function(req, res) {
 app.use('/player', express.static('public'));
 
 
+app.get('/api/v1/stream', function(req, res) {
+    res.send(streams);
+});
+
 app.get('/api/v1/stream/:index', function(req, res) {
-    // res.send(resMsg('GET'));
-    // if (index) {}
-    res.send(index);
+    // res.send(errCheck(streams[req.params.index]));
+    // res.send(errCheck(streams[req.params.index], 'GET'));
+    var obj = streamAt(req.params.index, 'GET');
+    if (obj.type === 'error') {
+        res.status(404);
+    }
+    res.send(obj);
+    // res.send(streamAt(req.params.index, 'GET'));
 });
 
 app.post('/api/v1/stream', function(req, res) {
+    console.log(req);
+    // TODO posted data should be appended to the original stream
+    res.send(streams);
+});
 
-    res.send(resMsg('POST'));
+app.post('/api/v1/stream/:index', function(req, res) {
+    // res.send(streamAt(undefined, 'POST'));
+    res.status(404).send(error);
 });
 
 app.put('/api/v1/stream', function(req, res) {
-    res.send(resMsg('PUT'));
+    // TODO posted data should replace the original stream
+    res.send('PUT ');
+});
+
+app.put('/api/v1/stream/:index', function(req, res) {
+    // TODO posted data should replace the original stream
+    console.log(req.params);
+    var x = streamAt(req.params.index, ' PUT');
+    if (x.type == 'error') {
+        res.send(x);
+    }
+    streams[req.params.index] = 'NEW NEW NEW';
+    res.send('PUT ' + req.params.index);
 });
 
 app.delete('/api/v1/stream', function(req, res) {
@@ -55,3 +82,18 @@ var streams = [{
     name: 'baz',
     quality: 'low'
 }]
+
+var error = {
+    type: 'error',
+    statusCode: 404,
+    msg: 'Requested resource not found'
+};
+
+var streamAt = function(index, method) {
+    var element = streams[index];
+    if (element !== undefined) {
+        return element;
+    }
+    console.log('error' + (method === undefined ? '' : ': could not ' + method + ' stream ' + index));
+    return error;
+}

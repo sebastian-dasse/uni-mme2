@@ -8,6 +8,12 @@ app.get('/', function(req, res) {
 app.use('/player', express.static('public'));
 
 
+app.use(function(req, res, next) {
+    console.log('%s %s %s %s', req.method, req.path, req.body, req.route);
+    next();
+});
+
+
 app.get('/api/v1/stream', function(req, res) {
     res.send(streams);
 });

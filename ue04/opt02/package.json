@@ -1,10 +1,12 @@
 {
-  "name": "UE04",
+  "name": "UE04-Opt2",
   "version": "0.0.0",
   "description": "My first node project.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "pretest": "npm install",
+    "test": "jasmine-node --autotest --watch . --color --junitreport --output test/reports --verbose test/",
+    
     "start": "node server.js"
   },
   "repository": {
@@ -17,7 +19,9 @@
     "body-parser": "^1.9.2",
     "express": "^4.10.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jasmine-node": "^1.14.5"
+  },
   "engines": {
     "node": "*"
   }

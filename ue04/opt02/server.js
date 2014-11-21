@@ -29,7 +29,7 @@ app.use(bodyParser.json());
  * Show welcome message. ** TODO ** replace with better routing with express router.
  */
 app.get('/', function(req, res) {
-    res.send('<h1>The amazing MME2-Server</h1>call "/player" for the video player <br> call "/api/v1/stream" for the REST service');
+    res.send('<h1>The amazing MME2-Server</h1>call "/player" for the video player <br> call "/api/v1/streams" for the REST service');
 });
 
 /**
@@ -43,7 +43,7 @@ app.use(function(req, res, next) {
 /**
  * Returns all streams.
  */
-app.get('/api/v1/stream', function(req, res) {
+app.get('/api/v1/streams', function(req, res) {
     res.send(streams);
 });
 
@@ -52,7 +52,7 @@ app.get('/api/v1/stream', function(req, res) {
  * given value (because it is a negative number, too large or not numeric) an
  * error will be thrown.
  */
-app.get('/api/v1/stream/:index', function(req, res) {
+app.get('/api/v1/streams/:index', function(req, res) {
     var stream = streams[req.params.index];
     if (typeof stream === 'undefined') {
         res.status(404).send(Error());
@@ -64,7 +64,7 @@ app.get('/api/v1/stream/:index', function(req, res) {
 /**
  * Creates a new stream.
  */
-app.post('/api/v1/stream', function(req, res) {
+app.post('/api/v1/streams', function(req, res) {
     var newStream = req.body;
     if (!newStream) {
         res.status(404).send(Error());
@@ -77,14 +77,14 @@ app.post('/api/v1/stream', function(req, res) {
 /**
  * Throws an error.
  */
-app.post('/api/v1/stream/:index', function(req, res) {
+app.post('/api/v1/streams/:index', function(req, res) {
     res.status(404).send(Error('Not allowed to post to a specified index.'));
 });
 
 /**
  * Updates all streams.
  */
-app.put('/api/v1/stream', function(req, res) {
+app.put('/api/v1/streams', function(req, res) {
     var newStreams = req.body;
     if (Object.prototype.toString.call(newStreams) !== '[object Array]') {
         res.status(404).send(Error('The request body has to be an array.'));
@@ -99,7 +99,7 @@ app.put('/api/v1/stream', function(req, res) {
  * given value (because it is a negative number, too large or not numeric) an
  * error will be thrown.
  */
-app.put('/api/v1/stream/:index', function(req, res) {
+app.put('/api/v1/streams/:index', function(req, res) {
     var index = req.params.index;
     if (typeof streams[index] === 'undefined') {
         res.status(404).send(Error());
@@ -114,7 +114,7 @@ app.put('/api/v1/stream/:index', function(req, res) {
  * given value (because it is a negative number, too large or not numeric) an
  * error will be thrown.
  */
-app.delete('/api/v1/stream', function(req, res) {
+app.delete('/api/v1/streams', function(req, res) {
     streams = [];
     res.send('All streams were successfully deleted.');
 });
@@ -122,7 +122,7 @@ app.delete('/api/v1/stream', function(req, res) {
 /**
  * Deletes all streams.
  */
-app.delete('/api/v1/stream/:index', function(req, res) {
+app.delete('/api/v1/streams/:index', function(req, res) {
     var index = req.params.index;
     if (typeof streams[index] === 'undefined') {
         res.status(404).send(Error());
@@ -154,4 +154,15 @@ var Error = function(msg) {
         statusCode: 404,
         msg: msg || 'Requested resource not found.'
     };
+};
+
+app.myTest = function() {
+    return 'hallo';
+}
+
+module.exports = {
+    app: app,
+    Error: Error,
+    server: server,
+    streams: streams
 };

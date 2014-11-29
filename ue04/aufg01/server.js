@@ -3,155 +3,151 @@
  *
  * @author Sebastian Dass&eacute;
  */
+(function() {
+    'use strict';
 
-'use strict';
+    // dependencies
+    var express = require('express'),
+        bodyParser = require('body-parser'),
+        app = express(),
+        router = express.Router(),
+        ServerError = require('./serverError').ServerError;
 
-var streams = [{
-    type: 'stream',
-    data: 'foo'
-}, {
-    type: 'stream',
-    data: 'bar'
-}, {
-    type: 'stream',
-    data: 'baz'
-}];
-
-
-var express = require('express');
-var bodyParser = require('body-parser');
-var app = express();
-
-app.use(bodyParser.json());
-
-
-/**
- * Show welcome message. ** TODO ** replace with better routing with express router.
- */
-app.get('/', function(req, res) {
-    res.send('<h1>The amazing MME2-Server</h1>call "/player" for the video player <br> call "/api/v1/streams" for the REST service');
-});
-
-/**
- * Logs some parameters of every HTTP request.
- */
-app.use(function(req, res, next) {
-    console.log('%s %s %s %s', req.method, req.path, req.body, req.route);
-    next();
-});
-
-/**
- * Returns all streams.
- */
-app.get('/api/v1"', function(req, res) {
-    res.send(streams);
-});
-
-/**
- * Returns the stream with the specified index. If there is no element for the
- * given value (because it is a negative number, too large or not numeric) an
- * error will be thrown.
- */
-app.get('/api/v1/streams/:index', function(req, res) {
-    var stream = streams[req.params.index];
-    if (typeof stream === 'undefined') {
-        res.status(404).send(Error());
-    } else {
-        res.send(stream);
-    }
-});
-
-/**
- * Creates a new stream.
- */
-app.post('/api/v1/streams', function(req, res) {
-    var newStream = req.body;
-    if (!newStream) {
-        res.status(404).send(Error());
-    } else {
-        streams.push(req.body);
-        res.status(201).send('New stream created at ' + (streams.length - 1) + '.');
-    }
-});
-
-/**
- * Throws an error.
- */
-app.post('/api/v1/streams/:index', function(req, res) {
-    res.status(404).send(Error('Not allowed to post to a specified index.'));
-});
-
-/**
- * Updates all streams.
- */
-app.put('/api/v1/streams', function(req, res) {
-    var newStreams = req.body;
-    if (Object.prototype.toString.call(newStreams) !== '[object Array]') {
-        res.status(404).send(Error('The request body has to be an array.'));
-    } else {
-        streams = newStreams;
-        res.send('The collection of streams was successfully overwritten.');
-    }
-});
-
-/**
- * Updates the stream with the specified index. If there is no element for the
- * given value (because it is a negative number, too large or not numeric) an
- * error will be thrown.
- */
-app.put('/api/v1/streams/:index', function(req, res) {
-    var index = req.params.index;
-    if (typeof streams[index] === 'undefined') {
-        res.status(404).send(Error());
-    } else {
-        streams[index] = req.body;
-        res.send('The stream at ' + index + ' was successfully overwritten.');
-    }
-});
-
-/**
- * Deletes the stream with the specified index. If there is no element for the
- * given value (because it is a negative number, too large or not numeric) an
- * error will be thrown.
- */
-app.delete('/api/v1/streams', function(req, res) {
-    streams = [];
-    res.send('All streams were successfully deleted.');
-});
-
-/**
- * Deletes all streams.
- */
-app.delete('/api/v1/streams/:index', function(req, res) {
-    var index = req.params.index;
-    if (typeof streams[index] === 'undefined') {
-        res.status(404).send(Error());
-    } else {
-        streams.splice(index, 1);
-        res.send('The stream at ' + index + ' was successfully deleted.');
-    }
-});
+    /**
+     * An array of streams containing some dummy data.
+     */
+    var streams = [{
+        data: 'foo'
+    }, {
+        data: 'bar'
+    }, {
+        data: 'baz'
+    }];
 
 
-/**
- * Start the server.
- */
-var server = app.listen(8000, function() {
+    /**
+     * Shows a welcome message.
+     */
+    router.get('/', function(req, res) {
+        res.send('<h1>The amazing MME2-Server</h1>call "/api/v1/streams" for the REST service');
+    });
 
-    var host = server.address().address;
-    var port = server.address().port;
+    /**
+     * Logs some parameters of every HTTP request.
+     */
+    router.use(function(req, res, next) {
+        console.log('%s %s', req.method, req.path);
+        next();
+    });
 
-    console.log('Serving at http://%s:%s', host, port);
-});
 
+    /**
+     * A simple GET returns all streams.
+     */
+    router.get('/streams', function(req, res) {
+        res.send(streams);
+    });
 
-/**
- * Constructs a simple error object with an optional message.
- */
-var Error = function(msg) {
-    return {
-        type: 'error',
-        statusCode: 404,
-        msg: msg || 'Requested resource not found.'
-    };
-};
+    /**
+     * A GET with an index parameter returns the stream at the specified index
+     * position. If there is no element for the given index value (because it
+     * is a negative number, too large or not numeric) a ServerError will be
+     * thrown.
+     */
+    router.get('/streams/:index', function(req, res) {
+        var index = req.params.index;
+        var stream = streams[index];
+        if (stream === undefined) {
+            res.status(404).send(new ServerError('No stream with index ' + index + ' found.'));
+        } else {
+            res.send(stream);
+        }
+    });
+
+    /**
+     * A simple POST creates a new stream at the end of the list.
+     */
+    router.post('/streams', function(req, res) {
+        var newStream = req.body;
+        if (!newStream) {
+            res.status(400).send(new ServerError('Your request body was empty.', 400));
+        } else {
+            streams.push(newStream);
+            res.status(201).send('New stream created at ' + (streams.length - 1) + '.');
+        }
+    });
+
+    /**
+     * A POST with an index parameter throws a ServerError.
+     */
+    router.post('/streams/:index?', function(req, res) {
+        res.status(405).send(new ServerError('Not allowed to post to a specified index.', 405));
+    });
+
+    /**
+     * A simple PUT updates all streams with the array that was passed with the
+     * request.
+     */
+    router.put('/streams', function(req, res) {
+        var newStreams = req.body;
+        if (Object.prototype.toString.call(newStreams) !== '[object Array]') {
+            res.status(400).send(new ServerError('The request body has to be an array.', 400));
+        } else {
+            streams = newStreams;
+            res.send('The collection of streams was successfully overwritten.');
+        }
+    });
+
+    /**
+     * A PUT with an index parameter updates the stream with the specified
+     * index. If there is no element for the given value (because it is a
+     * negative number, too large or not numeric) an ServerError will be thrown.
+     */
+    router.put('/streams/:index', function(req, res) {
+        var index = req.params.index;
+        var newStream = req.body;
+        if (streams[index] === undefined) {
+            res.status(404).send(new ServerError('No stream with index ' + index + ' found.'));
+        } else if (!newStream) {
+            res.status(400).send(new ServerError('Your request body was empty.', 400));
+        } else {
+            streams[index] = newStream;
+            res.send('The stream at ' + index + ' was successfully overwritten.');
+        }
+    });
+
+    /**
+     * A simple DELETE Deletes all streams.
+     */
+    router.delete('/streams', function(req, res) {
+        streams = [];
+        res.send('All streams were successfully deleted.');
+    });
+
+    /**
+     * A DELETE with an index parameter deletes the stream with the specified
+     * index. If there is no element for the given value (because it is a
+     * negative number, too large or not numeric) an ServerError will be thrown.
+     */
+    router.delete('/streams/:index', function(req, res) {
+        var index = req.params.index;
+        if (streams[index] === undefined) {
+            res.status(404).send(new ServerError('No stream with index ' + index + ' found.'));
+        } else {
+            streams.splice(index, 1);
+            res.send('The stream at ' + index + ' was successfully deleted.');
+        }
+    });
+
+    // configure the server app
+    app.use(bodyParser.json());
+    app.use('/api/v1', router);
+
+    // start the server
+    var server = app.listen(8000, function() {
+        var host = server.address().address;
+        var port = server.address().port;
+        console.log('Serving at http://%s:%s', host, port);
+    });
+
+}());

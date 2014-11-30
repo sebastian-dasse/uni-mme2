@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "pretest": "npm install",
+    "//": "jasmine-node --autotest --watch . --color --junitreport --output test/reports --verbose test/",
     "test": "jasmine-node --autotest --watch . --color --junitreport --output test/reports --verbose test/",
-    
     "start": "node server.js"
   },
   "repository": {
@@ -17,7 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.9.2",
-    "express": "^4.10.2"
+    "express": "^4.10.2",
+    "request": "^2.49.0"
   },
   "devDependencies": {
     "jasmine-node": "^1.14.5"

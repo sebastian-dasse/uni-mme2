@@ -5,7 +5,6 @@
   "main": "server.js",
   "scripts": {
     "pretest": "npm install",
-    "//": "jasmine-node --autotest --watch . --color --junitreport --output test/reports --verbose test/",
     "test": "jasmine-node --autotest --watch . --color --junitreport --output test/reports --verbose test/",
     "start": "node server.js"
   },

@@ -1,21 +1,32 @@
 describe('The stream module', function() {
     'use strict';
 
-    var streamJs = require('../stream'),
-        stream = streamJs.stream;
+    var stream = require('../stream').stream,
+        dummyStreamData = [];
 
-    var streamData;
+    // returns a fresh array of dummy data
+    var produceDummyData = function() {
+        var dummy = [{
+            data: 'foo'
+        }, {
+            data: 'bar'
+        }, {
+            data: 'baz'
+        }];
+        return dummy;
+        // return dummy.slice();
+    };
+
 
     beforeEach(function() {
-        streamData = streamJs.streamData;
-        streamJs = require('../stream'),
-            stream = streamJs.stream;
+        dummyStreamData = produceDummyData();
+        stream.setData(dummyStreamData);
     });
 
     // afterEach(function() {});
 
 
-    var checkInvalidIndices = function(fn) {
+    var expectInvalidIndicesToProcuceErrorFor = function(fn) {
         return function(index) {
             fn({
                 params: {
@@ -35,7 +46,7 @@ describe('The stream module', function() {
         };
     };
 
-    var checkForEmptyBody = function(fn, params) {
+    var expectEmptyBodyToProduceErrorFor = function(fn, params) {
         fn({
             body: undefined,
             params: params // optional
@@ -62,28 +73,30 @@ describe('The stream module', function() {
         expect(stream.putOne).toBeDefined();
         expect(stream.deleteAll).toBeDefined();
         expect(stream.deleteOne).toBeDefined();
-        expect(streamData).toBeDefined();
+        expect(stream.setData).toBeDefined();
+        expect(stream.getData).toBeDefined();
     });
 
     it('should have an array of streams', function() {
-        expect(Object.prototype.toString.call(streamData)).toEqual('[object Array]');
+        expect(Object.prototype.toString.call(stream.getData())).toEqual('[object Array]');
     });
 
     describe('getAll', function() {
 
         it('should send all streams', function() {
             stream.getAll({}, {
-                send: function(data) {
-                    expect(data).toEqual(streamData);
+                send: function(sentData) {
+                    expect(sentData).toEqual(dummyStreamData);
                 }
             });
         });
+
     });
 
     describe('getOne', function() {
 
         it('should reject invalid indices', function() {
-            var test = checkInvalidIndices(stream.getOne);
+            var test = expectInvalidIndicesToProcuceErrorFor(stream.getOne);
             test(-1);
             test(10000);
             test('abc');
@@ -95,8 +108,8 @@ describe('The stream module', function() {
                     index: 0
                 }
             }, {
-                send: function(data) {
-                    expect(data).toEqual(streamData[0]);
+                send: function(sentData) {
+                    expect(sentData).toEqual(dummyStreamData[0]);
                 }
             });
         });
@@ -106,14 +119,13 @@ describe('The stream module', function() {
     describe('postAll', function() {
 
         it('should reject a request with an empty body', function() {
-            checkForEmptyBody(stream.postAll);
+            expectEmptyBodyToProduceErrorFor(stream.postAll);
         });
 
         it('should create a new stream at the end of the list', function() {
-
-            var listLength = streamData.length,
+            var originalLength = stream.getData().length,
                 newElement = {
-                    "data": "fresh"
+                    data: 'fresh'
                 };
 
             stream.postAll({
@@ -122,20 +134,14 @@ describe('The stream module', function() {
                 status: function(code) {
                     expect(code).toEqual(201);
                     return {
-                        send: function(data) {
-                            // expect(streamData.length).toBe(listLength + 1);
-                            // expect(streamData[streamData.length - 1]).toBe(newElement);
-                        }
+                        send: function() {}
                     };
                 }
             });
 
-            stream.getAll({}, {
-                send: function(data) {
-                    expect(data.length).toBe(listLength + 1);
-                    expect(data[data.length - 1]).toBe(newElement);
-                }
-            });
+            var actual = stream.getData();
+            expect(actual.length).toBe(originalLength + 1);
+            expect(actual[actual.length - 1]).toEqual(newElement);
         });
 
     });
@@ -147,9 +153,9 @@ describe('The stream module', function() {
                 status: function(code) {
                     expect(code).toEqual(405);
                     return {
-                        send: function(data) {
-                            expect(data.type).toBe('ServerError');
-                            expect(data.statusCode).toBe(405);
+                        send: function(sentData) {
+                            expect(sentData.type).toBe('ServerError');
+                            expect(sentData.statusCode).toBe(405);
                         }
                     };
                 }
@@ -167,9 +173,9 @@ describe('The stream module', function() {
                 status: function(code) {
                     expect(code).toEqual(400);
                     return {
-                        send: function(data) {
-                            expect(data.type).toBe('ServerError');
-                            expect(data.statusCode).toBe(400);
+                        send: function(sentData) {
+                            expect(sentData.type).toBe('ServerError');
+                            expect(sentData.statusCode).toBe(400);
                         }
                     };
                 }
@@ -177,26 +183,17 @@ describe('The stream module', function() {
         });
 
         it('should update the list with the passed array', function() {
-
             var newList = [{
-                "data": "fresh"
+                data: 'fresh'
             }];
 
             stream.putAll({
                 body: newList
             }, {
-                send: function(data) {
-
-                    // TODO streamData should be injected into stream.js
-                    // expect(streamData).toEqual(newList);
-                }
+                send: function() {}
             });
 
-            stream.getAll({}, {
-                send: function(data) {
-                    expect(data).toEqual(newList);
-                }
-            });
+            expect(stream.getData()).toBe(newList);
         });
 
     });
@@ -204,20 +201,34 @@ describe('The stream module', function() {
     describe('putOne', function() {
 
         it('should reject invalid indices', function() {
-            var test = checkInvalidIndices(stream.putOne);
+            var test = expectInvalidIndicesToProcuceErrorFor(stream.putOne);
             test(-1);
             test(10000);
             test('abc');
         });
 
         it('should reject a request with an empty body', function() {
-            checkForEmptyBody(stream.putOne, {
+            expectEmptyBodyToProduceErrorFor(stream.putOne, {
                 index: 0
             });
         });
 
-        it('should update the stream at the specified index position', function() {
+        it('should not modify the legth of the stream array', function() {
+            var originalLength = stream.getData().length;
 
+            stream.putOne({
+                body: {},
+                params: {
+                    index: 0
+                }
+            }, {
+                send: function() {}
+            });
+
+            expect(stream.getData().length).toBe(originalLength);
+        });
+
+        it('should update the stream at the specified index position', function() {
             var pos = 0,
                 newElement = {
                     "data": "fresh"
@@ -232,15 +243,7 @@ describe('The stream module', function() {
                 send: function() {}
             });
 
-            stream.getOne({
-                params: {
-                    index: pos
-                }
-            }, {
-                send: function(data) {
-                    expect(data).toEqual(newElement);
-                }
-            });
+            expect(stream.getData()[pos]).toEqual(newElement);
         });
 
     });
@@ -248,20 +251,11 @@ describe('The stream module', function() {
     describe('deleteAll', function() {
 
         it('should delete all streams', function() {
-
             stream.deleteAll({}, {
                 send: function() {}
             });
 
-            stream.getAll({}, {
-                send: function(data) {
-                    expect(data.length).toBe(0);
-                    expect(data).toEqual([]);
-                }
-            });
-
-            // expect(streamData.length).toBe(0);
-            // expect(streamData).toEqual([]);
+            expect(stream.getData().length).toBe(0);
         });
 
     });
@@ -269,82 +263,29 @@ describe('The stream module', function() {
     describe('deleteOne', function() {
 
         it('should reject invalid indices', function() {
-            var test = checkInvalidIndices(stream.getOne);
+            var test = expectInvalidIndicesToProcuceErrorFor(stream.getOne);
             test(-1);
             test(10000);
             test('abc');
         });
 
+        it('should delete the stream with the specified index position', function() {
+            var pos = 0,
+                originalLength = stream.getData().length,
+                elementToDelete = dummyStreamData[0];
 
-        // TODO
+            stream.deleteOne({
+                params: {
+                    index: pos
+                }
+            }, {
+                send: function() {}
+            });
 
-        // it('should delete the stream with the specified index position', function() {
-
-        //     var pos = 0,
-        //         listLength = streamData.length, // not right???
-        //         elementToDelete;
-
-        //     stream.getAll({}, {
-        //         send: function(data) {
-        //             data.push({
-        //                 "data": 1
-        //             });
-        //             data.push({
-        //                 "data": 2
-        //             });
-        //             data.push({
-        //                 "data": 3
-        //             });
-        //             console.log(data)
-        //         }
-        //     });
-
-        //     stream.getOne({
-        //         params: {
-        //             index: pos
-        //         }
-        //     }, {
-        //         // status: function(code) {
-        //         //         // elementToDelete = data;
-        //         //         return {
-        //         //             send: function(data) {
-        //         //                 elementToDelete = data;
-        //         //             }
-        //         //         };
-        //         //     }
-        //         send: function(data) {
-        //             elementToDelete = data;
-        //         }
-        //     });
-
-        //     stream.deleteOne({
-        //         params: {
-        //             index: pos
-        //         }
-        //     }, {
-        //         send: function() {}
-        //     });
-
-        //     // stream.getOne({
-        //     //     params: {
-        //     //         index: pos
-        //     //     }
-        //     // }, {
-        //     //     send: function(data) {
-        //     //         expect(data).not.toEqual(elementToDelete);
-        //     //     }
-        //     // });
-
-        //     stream.getAll({}, {
-        //         send: function(data) {
-        //             expect(data).not.toContain(elementToDelete);
-        //             expect(data.length).toBe(listLength - 1);
-        //             expect(data.length).toBe(listLength);
-        //         }
-        //     });
-
-        //     // expect(data.length).toBe(listLength - 1);
-        // });
+            var actual = stream.getData();
+            expect(actual).not.toContain(elementToDelete);
+            expect(actual.length).toBe(originalLength - 1);
+        });
 
     });
 

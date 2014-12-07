@@ -1,4 +1,4 @@
-describe('The ServerError module', function() {
+describe('The serverError module', function() {
     'use strict';
 
     var ServerError = require('../serverError').ServerError;

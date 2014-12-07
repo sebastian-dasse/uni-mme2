@@ -13,6 +13,15 @@
         router = express.Router(),
         stream = require('./stream').stream;
 
+    // some dummy data
+    var dummmyStreamData = [{
+        data: 'foo'
+    }, {
+        data: 'bar'
+    }, {
+        data: 'baz'
+    }];
+    stream.setData(dummmyStreamData);
 
     /**
      * Shows a welcome message.
@@ -54,9 +63,9 @@
         console.log('Serving at http://%s:%s', host, port);
     });
 
-    module.exports = {
-        app: app,
-        server: server
-    };
+    // module.exports = {
+    //     app: app,
+    //     router: router
+    // };
 
 }());

@@ -34,7 +34,7 @@ describe('The stream module', function() {
                 }
             }, {
                 status: function(code) {
-                    expect(code).toEqual(404);
+                    expect(code).toBe(404);
                     return {
                         send: function(data) {
                             expect(data.type).toBe('ServerError');
@@ -52,7 +52,7 @@ describe('The stream module', function() {
             params: params // optional
         }, {
             status: function(code) {
-                expect(code).toEqual(400);
+                expect(code).toBe(400);
                 return {
                     send: function(data) {
                         expect(data.type).toBe('ServerError');
@@ -132,9 +132,11 @@ describe('The stream module', function() {
                 body: newElement
             }, {
                 status: function(code) {
-                    expect(code).toEqual(201);
+                    expect(code).toBe(201);
                     return {
-                        send: function() {}
+                        send: function(setData) {
+                            expect(setData).toEqual(newElement);
+                        }
                     };
                 }
             });
@@ -151,7 +153,7 @@ describe('The stream module', function() {
         it('should not be allowed', function() {
             stream.postOne({}, {
                 status: function(code) {
-                    expect(code).toEqual(405);
+                    expect(code).toBe(405);
                     return {
                         send: function(sentData) {
                             expect(sentData.type).toBe('ServerError');
@@ -171,7 +173,7 @@ describe('The stream module', function() {
                 body: 'no array'
             }, {
                 status: function(code) {
-                    expect(code).toEqual(400);
+                    expect(code).toBe(400);
                     return {
                         send: function(sentData) {
                             expect(sentData.type).toBe('ServerError');
@@ -190,7 +192,14 @@ describe('The stream module', function() {
             stream.putAll({
                 body: newList
             }, {
-                send: function() {}
+                status: function(code) {
+                    expect(code).toBe(201);
+                    return {
+                        send: function(sentData) {
+                            expect(sentData).toEqual(newList);
+                        }
+                    };
+                }
             });
 
             expect(stream.getData()).toBe(newList);
@@ -213,7 +222,7 @@ describe('The stream module', function() {
             });
         });
 
-        it('should not modify the legth of the stream array', function() {
+        it('should not modify the total number of streams', function() {
             var originalLength = stream.getData().length;
 
             stream.putOne({
@@ -252,7 +261,13 @@ describe('The stream module', function() {
 
         it('should delete all streams', function() {
             stream.deleteAll({}, {
-                send: function() {}
+                status: function(code) {
+                    expect(code).toBe(200);
+                    // expect(code).toBe(204);
+                    return {
+                        send: function() {}
+                    };
+                }
             });
 
             expect(stream.getData().length).toBe(0);
@@ -271,7 +286,6 @@ describe('The stream module', function() {
 
         it('should delete the stream with the specified index position', function() {
             var pos = 0,
-                originalLength = stream.getData().length,
                 elementToDelete = dummyStreamData[0];
 
             stream.deleteOne({
@@ -279,12 +293,17 @@ describe('The stream module', function() {
                     index: pos
                 }
             }, {
-                send: function() {}
+                status: function(code) {
+                    expect(code).toBe(200);
+                    // expect(code).toBe(204);
+                    return {
+                        send: function() {}
+                    };
+                }
             });
 
             var actual = stream.getData();
-            expect(actual).not.toContain(elementToDelete);
-            expect(actual.length).toBe(originalLength - 1);
+            expect(actual[pos]).toBeUndefined();
         });
 
     });

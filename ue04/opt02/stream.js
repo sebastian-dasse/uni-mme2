@@ -36,7 +36,7 @@
     stream.getOne = function(req, res, next) {
         var index = req.params.index;
         var stream = streamData[index];
-        if (stream === undefined) {
+        if (!stream) {
             res.status(404).send(new ServerError('No stream with index ' + index + ' found.'));
         } else {
             res.send(stream);
@@ -52,7 +52,7 @@
             res.status(400).send(new ServerError('Your request body was empty.', 400));
         } else {
             streamData.push(newStream);
-            res.status(201).send('New stream created at ' + (streamData.length - 1) + '.');
+            res.status(201).send(streamData[(streamData.length - 1)]);
         }
     };
 
@@ -73,7 +73,7 @@
             res.status(400).send(new ServerError('The request body has to be an array.', 400));
         } else {
             streamData = newStreams;
-            res.send('The collection of streams was successfully overwritten.');
+            res.status(201).send(streamData);
         }
     };
 
@@ -85,7 +85,7 @@
     stream.putOne = function(req, res, next) {
         var index = req.params.index;
         var newStream = req.body;
-        if (streamData[index] === undefined) {
+        if (!streamData[index]) {
             res.status(404).send(new ServerError('No stream with index ' + index + ' found.'));
         } else if (!newStream) {
             res.status(400).send(new ServerError('Your request body was empty.', 400));
@@ -100,7 +100,8 @@
      */
     stream.deleteAll = function(req, res, next) {
         streamData = [];
-        res.send('All streams were successfully deleted.');
+        res.status(200).send('All streams were successfully deleted.');
+        // res.status(204).send();
     };
 
     /**
@@ -110,11 +111,13 @@
      */
     stream.deleteOne = function(req, res, next) {
         var index = req.params.index;
-        if (streamData[index] === undefined) {
+        if (!streamData[index]) {
             res.status(404).send(new ServerError('No stream with index ' + index + ' found.'));
         } else {
-            streamData.splice(index, 1);
-            res.send('The stream at ' + index + ' was successfully deleted.');
+            // streamData.splice(index, 1);
+            streamData[index] = undefined;
+            res.status(200).send('The stream at ' + index + ' was successfully deleted.');
+            // res.status(204).send();
         }
     };
 

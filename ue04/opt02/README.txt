@@ -3,7 +3,7 @@
 
 Before first run you will have to install the application. To do so type:
 
-    npm install express --save
+    npm install
 
 
 Run the application with:

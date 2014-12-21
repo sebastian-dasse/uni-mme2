@@ -2,6 +2,7 @@ describe('The server module', function() {
     'use strict';
 
     var request = require('request'),
+        streamsService = require('../streamsService').streamsService,
         url = 'http://localhost:8000/api/v1/streams/';
 
     beforeEach(function(done) {
@@ -12,13 +13,17 @@ describe('The server module', function() {
         }, {
             id: 'baz'
         }];
-        request.put({
-            url: url,
-            json: true,
-            body: dummyStreams
-        }, function(err, response, body) {
-            done();
-        });
+
+        streamsService.setData(dummyStreams);
+        done();
+
+        // request.put({
+        //     url: url,
+        //     json: true,
+        //     body: dummyStreams
+        // }, function(err, response, body) {
+        //     done();
+        // });
     });
 
     // afterEach(function() {});

@@ -1,7 +1,7 @@
 describe('The streams module', function() {
     'use strict';
 
-    var streams = require('../streams').streams,
+    var streamsService = require('../streamsService').streamsService,
         dummyStreamData = [];
 
     // returns a fresh array of dummy data
@@ -20,11 +20,11 @@ describe('The streams module', function() {
 
     beforeEach(function() {
         dummyStreamData = produceDummyData();
-        streams.setData(dummyStreamData);
+        streamsService.setData(dummyStreamData);
     });
 
     afterEach(function() {
-        // streams.setData([])
+        // streamsService.setData([])
     });
 
 
@@ -67,26 +67,26 @@ describe('The streams module', function() {
 
 
     it('should export dependencies', function() {
-        expect(streams.getAll).toBeDefined();
-        expect(streams.getOne).toBeDefined();
-        expect(streams.postAll).toBeDefined();
-        // expect(streams.postOne).toBeDefined();
-        expect(streams.putAll).toBeDefined();
-        expect(streams.putOne).toBeDefined();
-        // expect(streams.deleteAll).toBeDefined();
-        expect(streams.deleteOne).toBeDefined();
-        expect(streams.setData).toBeDefined();
-        expect(streams.getData).toBeDefined();
+        expect(streamsService.getAll).toBeDefined();
+        expect(streamsService.getOne).toBeDefined();
+        expect(streamsService.postAll).toBeDefined();
+        // expect(streamsService.postOne).toBeDefined();
+        expect(streamsService.putAll).toBeDefined();
+        expect(streamsService.putOne).toBeDefined();
+        // expect(streamsService.deleteAll).toBeDefined();
+        expect(streamsService.deleteOne).toBeDefined();
+        expect(streamsService.setData).toBeDefined();
+        expect(streamsService.getData).toBeDefined();
     });
 
     it('should have an array of streams', function() {
-        expect(Object.prototype.toString.call(streams.getData())).toEqual('[object Array]');
+        expect(Object.prototype.toString.call(streamsService.getData())).toEqual('[object Array]');
     });
 
     describe('getAll', function() {
 
         it('should send all streams', function() {
-            streams.getAll({
+            streamsService.getAll({
                 query: {}
             }, {
                 send: function(sentData) {
@@ -100,14 +100,14 @@ describe('The streams module', function() {
     describe('getOne', function() {
 
         it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(streams.getOne);
+            var test = expectInvalidIndicesToProcuceErrorFor(streamsService.getOne);
             test(-1);
             test(10000);
             test('abc');
         });
 
         it('should send the stream at the specified index position', function() {
-            streams.getOne({
+            streamsService.getOne({
                 params: {
                     index: 0
                 }
@@ -123,16 +123,16 @@ describe('The streams module', function() {
     describe('postAll', function() {
 
         it('should reject a request with an empty body', function() {
-            expectEmptyBodyToProduceErrorFor(streams.postAll);
+            expectEmptyBodyToProduceErrorFor(streamsService.postAll);
         });
 
         it('should create a new stream at the end of the list', function() {
-            var originalLength = streams.getData().length,
+            var originalLength = streamsService.getData().length,
                 newElement = {
                     data: 'fresh'
                 };
 
-            streams.postAll({
+            streamsService.postAll({
                 body: newElement
             }, {
                 status: function(code) {
@@ -145,7 +145,7 @@ describe('The streams module', function() {
                 }
             });
 
-            var actual = streams.getData();
+            var actual = streamsService.getData();
             expect(actual.length).toBe(originalLength + 1);
             expect(actual[actual.length - 1]).toEqual(newElement);
         });
@@ -155,7 +155,7 @@ describe('The streams module', function() {
     // describe('postOne', function() {
 
     //     it('should not be allowed', function() {
-    //         streams.postOne({}, {
+    //         streamsService.postOne({}, {
     //             status: function(code) {
     //                 expect(code).toBe(405);
     //                 return {
@@ -173,7 +173,7 @@ describe('The streams module', function() {
     describe('putAll', function() {
 
         it('should only accept an array', function() {
-            streams.putAll({
+            streamsService.putAll({
                 body: 'no array'
             }, {
                 status: function(code) {
@@ -193,7 +193,7 @@ describe('The streams module', function() {
                 data: 'fresh'
             }];
 
-            streams.putAll({
+            streamsService.putAll({
                 body: newList
             }, {
                 status: function(code) {
@@ -206,7 +206,7 @@ describe('The streams module', function() {
                 }
             });
 
-            expect(streams.getData()).toBe(newList);
+            expect(streamsService.getData()).toBe(newList);
         });
 
     });
@@ -214,22 +214,22 @@ describe('The streams module', function() {
     describe('putOne', function() {
 
         it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(streams.putOne);
+            var test = expectInvalidIndicesToProcuceErrorFor(streamsService.putOne);
             test(-1);
             test(10000);
             test('abc');
         });
 
         it('should reject a request with an empty body', function() {
-            expectEmptyBodyToProduceErrorFor(streams.putOne, {
+            expectEmptyBodyToProduceErrorFor(streamsService.putOne, {
                 index: 0
             });
         });
 
         it('should not modify the total number of streams', function() {
-            var originalLength = streams.getData().length;
+            var originalLength = streamsService.getData().length;
 
-            streams.putOne({
+            streamsService.putOne({
                 body: {},
                 params: {
                     index: 0
@@ -238,7 +238,7 @@ describe('The streams module', function() {
                 send: function() {}
             });
 
-            expect(streams.getData().length).toBe(originalLength);
+            expect(streamsService.getData().length).toBe(originalLength);
         });
 
         it('should update the stream at the specified index position', function() {
@@ -247,7 +247,7 @@ describe('The streams module', function() {
                     "data": "fresh"
                 };
 
-            streams.putOne({
+            streamsService.putOne({
                 body: newElement,
                 params: {
                     index: pos
@@ -256,7 +256,7 @@ describe('The streams module', function() {
                 send: function() {}
             });
 
-            expect(streams.getData()[pos]).toEqual(newElement);
+            expect(streamsService.getData()[pos]).toEqual(newElement);
         });
 
     });
@@ -264,7 +264,7 @@ describe('The streams module', function() {
     // describe('deleteAll', function() {
 
     //     it('should delete all streams', function() {
-    //         streams.deleteAll({}, {
+    //         streamsService.deleteAll({}, {
     //             status: function(code) {
     //                 expect(code).toBe(204);
     //                 return {
@@ -273,7 +273,7 @@ describe('The streams module', function() {
     //             }
     //         });
 
-    //         expect(streams.getData().length).toBe(0);
+    //         expect(streamsService.getData().length).toBe(0);
     //     });
 
     // });
@@ -281,7 +281,7 @@ describe('The streams module', function() {
     describe('deleteOne', function() {
 
         it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(streams.getOne);
+            var test = expectInvalidIndicesToProcuceErrorFor(streamsService.getOne);
             test(-1);
             test(10000);
             test('abc');
@@ -291,7 +291,7 @@ describe('The streams module', function() {
             var pos = 0,
                 elementToDelete = dummyStreamData[0];
 
-            streams.deleteOne({
+            streamsService.deleteOne({
                 params: {
                     index: pos
                 }
@@ -304,7 +304,7 @@ describe('The streams module', function() {
                 }
             });
 
-            var actual = streams.getData();
+            var actual = streamsService.getData();
             expect(actual[pos]).toBeUndefined();
         });
 

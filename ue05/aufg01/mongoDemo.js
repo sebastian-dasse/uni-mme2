@@ -7,10 +7,8 @@
     'use strict';
 
     // dependencies
-    var dburl = 'localhost/mongoDemoDb',
-        collections = ['streams'],
-        mongojs = require('mongojs');
-    var db = mongojs(dburl, collections);
+    var mongojs = require('mongojs'),
+        db = mongojs('mongoDemoDb', ['streams']);
 
     // short form:
     // var db = require('mongojs').connect('localhost/mydb', ['streams']);
@@ -50,22 +48,39 @@
         state: 0
     };
 
+    var lastSavedId;
     var saveIt = function(stream) {
         db.streams.save(stream, function(err, savedStream) {
             if (err || !savedStream) {
                 console.log('Stream ' + savedStream + ' not save because of error ' + err);
             } else {
-                console.log('Stream ' + savedStream.name + ' saved.');
+                // console.log('Stream ' + savedStream.name + ' saved.');
+                console.log('savedStream: ---------->');
+                console.log(savedStream);
+                lastSavedId = savedStream._id;
+                console.log('savedStream: <----------');
+                console.log();
             }
         });
     };
 
+    db.streams.drop();
     saveIt(dummyStream1);
+    console.log('-- saved 1 --');
     saveIt(dummyStream2);
+    console.log('-- saved 2 --');
+    console.log('-- init done --');
+    dummyStream2.name = 'new name';
+    delete dummyStream2.url;
+    dummyStream2._id = lastSavedId;
+    saveIt(dummyStream2);
+    console.log('-- changes done --');
 
     db.streams.find(function(err, docs) {
         err && console.log(err);
         console.log(docs);
+        console.log();
     });
+    console.log('-- list done --');
 
 }());

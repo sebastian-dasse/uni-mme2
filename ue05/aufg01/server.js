@@ -11,29 +11,29 @@
         bodyParser = require('body-parser'),
         app = express(),
         router = express.Router(),
-        streams = require('./streams').streams;
+        streamsService = require('./streamsService').streamsService;
 
     // some dummy data
     var dummmyStreamData = [{
-        _id: '1',
+        // _id: '1',
         name: 'foo',
         description: 'this is foo',
         url: 'https://www.youtube.com/watch?v=UDB-jm8MWro',
         state: 0
     }, {
-        _id: '2',
+        // _id: '2',
         name: 'bar',
         description: 'this is bar',
         url: 'https://www.youtube.com/watch?v=B7UmUX68KtE',
         state: 0
     }, {
-        _id: '3',
+        // _id: '3',
         name: 'baz',
         description: 'this is baz',
         url: 'https://www.youtube.com/watch?v=2Qj8PhxSnhg',
         state: 0
     }];
-    streams.setData(dummmyStreamData);
+    streamsService.setData(dummmyStreamData);
 
     /**
      * Shows a welcome message.
@@ -46,22 +46,22 @@
      * Logs some parameters of every HTTP request.
      */
     router.use(function(req, res, next) {
-        console.log('%s %s', req.method, req.path);
+        console.log('%s %s', req.method, req.url);
         next();
     });
 
 
     router.route('/streams')
-        .get(streams.getAll)
-        .post(streams.postAll)
-        .put(streams.putAll);
-    // .delete(streams.deleteAll);
+        .get(streamsService.getAll)
+        .post(streamsService.postAll)
+        .put(streamsService.putAll);
+    // .delete(streamsService.deleteAll);
 
-    router.route('/streams/:index')
-        .get(streams.getOne)
-        // .post(streams.postOne)
-        .put(streams.putOne)
-        .delete(streams.deleteOne);
+    router.route('/streams/:_id')
+        .get(streamsService.getOne)
+        // .post(streamsService.postOne)
+        .put(streamsService.putOne)
+        .delete(streamsService.deleteOne);
 
 
     // configure the server app

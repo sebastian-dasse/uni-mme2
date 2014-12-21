@@ -1,5 +1,5 @@
 /**
- * A server error.
+ * A model for server errors.
  *
  * @author Sebastian Dass&eacute;
  */

@@ -39,7 +39,7 @@ describe('The server module', function() {
             });
         });
 
-        describe('GET simple', function() {
+        describe('GET one', function() {
 
             it('should respond with an error for invalid indices', function(done) {
                 [-1, 10000, 'abc'].forEach(function(index) {
@@ -102,21 +102,21 @@ describe('The server module', function() {
 
         });
 
-        describe('POST simple', function() {
+        // describe('POST one', function() {
 
-            it('should not be allowed ', function(done) {
-                request.post({
-                    url: url + '1',
-                    json: true,
-                    body: {}
-                }, function(err, response, body) {
-                    expect(response.statusCode).toBe(405);
-                    expect(body.type).toEqual('ServerError');
-                    done();
-                });
-            });
+        //     it('should not be allowed ', function(done) {
+        //         request.post({
+        //             url: url + '1',
+        //             json: true,
+        //             body: {}
+        //         }, function(err, response, body) {
+        //             expect(response.statusCode).toBe(405);
+        //             expect(body.type).toEqual('ServerError');
+        //             done();
+        //         });
+        //     });
 
-        });
+        // });
 
         describe('PUT all', function() {
 
@@ -163,7 +163,7 @@ describe('The server module', function() {
 
         });
 
-        describe('PUT simple', function() {
+        describe('PUT one', function() {
 
             it('should respond with an error for invalid indices', function(done) {
                 [-1, 10000, 'abc'].forEach(function(index) {
@@ -248,62 +248,62 @@ describe('The server module', function() {
 
         // it('should only update the specified attributes', function(done) {}); // TODO
 
-    });
+        // describe('DELETE all', function() {
 
-    describe('DELETE all', function() {
+        //     it('should delete all streams', function(done) {
+        //         request.del({
+        //             url: url
+        //         }, function(err, response, body) {
+        //             expect(response.statusCode).toBe(204);
 
-        it('should delete all streams', function(done) {
-            request.del({
-                url: url
-            }, function(err, response, body) {
-                expect(response.statusCode).toBe(204);
+        //             request.get({
+        //                 url: url,
+        //                 json: true
+        //             }, function(err, response, body) {
+        //                 expect(Array.isArray(body)).toBe(true);
+        //                 expect(body.length).toBe(0);
+        //                 done();
+        //             });
+        //         });
+        //     });
 
-                request.get({
-                    url: url,
-                    json: true
-                }, function(err, response, body) {
-                    expect(Array.isArray(body)).toBe(true);
-                    expect(body.length).toBe(0);
-                    done();
+        // });
+
+        describe('DELETE one', function() {
+
+            it('should respond with an error for invalid indices', function(done) {
+                [-1, 10000, 'abc'].forEach(function(index) {
+                    request.del({
+                        url: url + index,
+                        json: true
+                    }, function(err, response, body) {
+                        expect(response.statusCode).toBe(404);
+                        expect(body.type).toEqual('ServerError');
+                        done();
+                    });
                 });
             });
-        });
 
-    });
+            it('should delete the stream with the specified index position', function(done) {
+                var index = 0;
 
-    describe('DELETE simple', function() {
-
-        it('should respond with an error for invalid indices', function(done) {
-            [-1, 10000, 'abc'].forEach(function(index) {
                 request.del({
                     url: url + index,
                     json: true
                 }, function(err, response, body) {
-                    expect(response.statusCode).toBe(404);
-                    expect(body.type).toEqual('ServerError');
-                    done();
+                    expect(response.statusCode).toBe(204);
+
+                    request.get({
+                        url: url + index,
+                        json: true
+                    }, function(err, response, body) {
+                        expect(response.statusCode).toBe(404);
+                        expect(body.type).toEqual('ServerError');
+                        done();
+                    });
                 });
             });
-        });
 
-        it('should delete the stream with the specified index position', function(done) {
-            var index = 0;
-
-            request.del({
-                url: url + index,
-                json: true
-            }, function(err, response, body) {
-                expect(response.statusCode).toBe(204);
-
-                request.get({
-                    url: url + index,
-                    json: true
-                }, function(err, response, body) {
-                    expect(response.statusCode).toBe(404);
-                    expect(body.type).toEqual('ServerError');
-                    done();
-                });
-            });
         });
 
     });

@@ -1,311 +1,60 @@
-describe('The stream module', function() {
+describe('The Stream module', function() {
     'use strict';
 
-    var stream = require('../stream').stream,
-        dummyStreamData = [];
+    var Stream = require('../Stream').Stream,
+        ServerError = require('../ServerError').ServerError;
 
-    // returns a fresh array of dummy data
-    var produceDummyData = function() {
-        var dummy = [{
-            data: 'foo'
-        }, {
-            data: 'bar'
-        }, {
-            data: 'baz'
-        }];
-        return dummy;
-        // return dummy.slice();
-    };
-
-
-    beforeEach(function() {
-        dummyStreamData = produceDummyData();
-        stream.setData(dummyStreamData);
-    });
-
-    afterEach(function() {
-        // stream.setData([])
-    });
-
-
-    var expectInvalidIndicesToProcuceErrorFor = function(fn) {
-        return function(index) {
-            fn({
-                params: {
-                    index: index
-                }
-            }, {
-                status: function(code) {
-                    expect(code).toBe(404);
-                    return {
-                        send: function(data) {
-                            expect(data.type).toBe('ServerError');
-                            expect(data.statusCode).toBe(404);
-                        }
-                    };
-                }
-            });
-        };
-    };
-
-    var expectEmptyBodyToProduceErrorFor = function(fn, params) {
-        fn({
-            body: undefined,
-            params: params // optional
-        }, {
-            status: function(code) {
-                expect(code).toBe(400);
-                return {
-                    send: function(data) {
-                        expect(data.type).toBe('ServerError');
-                        expect(data.statusCode).toBe(400);
-                    }
-                };
-            }
-        });
-    };
-
+    // beforeEach(function() {});
+    // afterEach(function() {});
 
     it('should export dependencies', function() {
-        expect(stream.getAll).toBeDefined();
-        expect(stream.getOne).toBeDefined();
-        expect(stream.postAll).toBeDefined();
-        expect(stream.postOne).toBeDefined();
-        expect(stream.putAll).toBeDefined();
-        expect(stream.putOne).toBeDefined();
-        expect(stream.deleteAll).toBeDefined();
-        expect(stream.deleteOne).toBeDefined();
-        expect(stream.setData).toBeDefined();
-        expect(stream.getData).toBeDefined();
+        expect(Stream).toBeDefined();
+        expect(Stream.create).toBeDefined();
     });
 
-    it('should have an array of streams', function() {
-        expect(Object.prototype.toString.call(stream.getData())).toEqual('[object Array]');
+    var name = 'foo',
+        description = 'this is foo',
+        url = 'http://www.foo.bar',
+        state = 0;
+
+    it('should have a contructor', function() {
+        var config = {
+            name: name,
+            description: description,
+            url: url,
+            state: state
+        };
+        var stream = new Stream(config);
+        expect(stream.name).toEqual(name);
+        expect(stream.description).toEqual(description);
+        expect(stream.url).toEqual(url);
+        expect(stream.state).toEqual(state);
     });
 
-    describe('getAll', function() {
-
-        it('should send all streams', function() {
-            stream.getAll({}, {
-                send: function(sentData) {
-                    expect(sentData).toEqual(dummyStreamData);
-                }
-            });
-        });
-
+    it('should have a static factory method', function() {
+        var stream = Stream.create(name, description, url, state);
+        expect(stream.name).toEqual(name);
+        expect(stream.description).toEqual(description);
+        expect(stream.url).toEqual(url);
+        expect(stream.state).toEqual(state);
     });
 
-    describe('getOne', function() {
-
-        it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(stream.getOne);
-            test(-1);
-            test(10000);
-            test('abc');
-        });
-
-        it('should send the stream at the specified index position', function() {
-            stream.getOne({
-                params: {
-                    index: 0
-                }
-            }, {
-                send: function(sentData) {
-                    expect(sentData).toEqual(dummyStreamData[0]);
-                }
-            });
-        });
-
+    it('should throw an error if name is not defined', function() {
+        expect(function() {
+            Stream.create(null, description, url, state)
+        }).toThrow(new ServerError());
     });
 
-    describe('postAll', function() {
-
-        it('should reject a request with an empty body', function() {
-            expectEmptyBodyToProduceErrorFor(stream.postAll);
-        });
-
-        it('should create a new stream at the end of the list', function() {
-            var originalLength = stream.getData().length,
-                newElement = {
-                    data: 'fresh'
-                };
-
-            stream.postAll({
-                body: newElement
-            }, {
-                status: function(code) {
-                    expect(code).toBe(201);
-                    return {
-                        send: function(setData) {
-                            expect(setData).toEqual(newElement);
-                        }
-                    };
-                }
-            });
-
-            var actual = stream.getData();
-            expect(actual.length).toBe(originalLength + 1);
-            expect(actual[actual.length - 1]).toEqual(newElement);
-        });
-
+    it('should throw an error if URL is not defined', function() {
+        expect(function() {
+            Stream.create(name, description, null, state)
+        }).toThrow(new ServerError());
     });
 
-    describe('postOne', function() {
-
-        it('should not be allowed', function() {
-            stream.postOne({}, {
-                status: function(code) {
-                    expect(code).toBe(405);
-                    return {
-                        send: function(sentData) {
-                            expect(sentData.type).toBe('ServerError');
-                            expect(sentData.statusCode).toBe(405);
-                        }
-                    };
-                }
-            });
-        });
-
-    });
-
-    describe('putAll', function() {
-
-        it('should only accept an array', function() {
-            stream.putAll({
-                body: 'no array'
-            }, {
-                status: function(code) {
-                    expect(code).toBe(400);
-                    return {
-                        send: function(sentData) {
-                            expect(sentData.type).toBe('ServerError');
-                            expect(sentData.statusCode).toBe(400);
-                        }
-                    };
-                }
-            });
-        });
-
-        it('should update the list with the passed array', function() {
-            var newList = [{
-                data: 'fresh'
-            }];
-
-            stream.putAll({
-                body: newList
-            }, {
-                status: function(code) {
-                    expect(code).toBe(201);
-                    return {
-                        send: function(sentData) {
-                            expect(sentData).toEqual(newList);
-                        }
-                    };
-                }
-            });
-
-            expect(stream.getData()).toBe(newList);
-        });
-
-    });
-
-    describe('putOne', function() {
-
-        it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(stream.putOne);
-            test(-1);
-            test(10000);
-            test('abc');
-        });
-
-        it('should reject a request with an empty body', function() {
-            expectEmptyBodyToProduceErrorFor(stream.putOne, {
-                index: 0
-            });
-        });
-
-        it('should not modify the total number of streams', function() {
-            var originalLength = stream.getData().length;
-
-            stream.putOne({
-                body: {},
-                params: {
-                    index: 0
-                }
-            }, {
-                send: function() {}
-            });
-
-            expect(stream.getData().length).toBe(originalLength);
-        });
-
-        it('should update the stream at the specified index position', function() {
-            var pos = 0,
-                newElement = {
-                    "data": "fresh"
-                };
-
-            stream.putOne({
-                body: newElement,
-                params: {
-                    index: pos
-                }
-            }, {
-                send: function() {}
-            });
-
-            expect(stream.getData()[pos]).toEqual(newElement);
-        });
-
-    });
-
-    describe('deleteAll', function() {
-
-        it('should delete all streams', function() {
-            stream.deleteAll({}, {
-                status: function(code) {
-                    expect(code).toBe(204);
-                    return {
-                        send: function() {}
-                    };
-                }
-            });
-
-            expect(stream.getData().length).toBe(0);
-        });
-
-    });
-
-    describe('deleteOne', function() {
-
-        it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(stream.getOne);
-            test(-1);
-            test(10000);
-            test('abc');
-        });
-
-        it('should delete the stream with the specified index position', function() {
-            var pos = 0,
-                elementToDelete = dummyStreamData[0];
-
-            stream.deleteOne({
-                params: {
-                    index: pos
-                }
-            }, {
-                status: function(code) {
-                    expect(code).toBe(204);
-                    return {
-                        send: function() {}
-                    };
-                }
-            });
-
-            var actual = stream.getData();
-            expect(actual[pos]).toBeUndefined();
-        });
-
+    it('should throw an error if the constructor is called without configuration object', function() {
+        expect(function() {
+            new Stream()
+        }).toThrow(new ServerError());
     });
 
 });

@@ -1,7 +1,7 @@
-describe('The serverError module', function() {
+describe('The ServerError module', function() {
     'use strict';
 
-    var ServerError = require('../serverError').ServerError;
+    var ServerError = require('../ServerError').ServerError;
 
     // beforeEach(function() {});
     // afterEach(function() {});

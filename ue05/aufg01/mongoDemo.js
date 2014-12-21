@@ -7,7 +7,7 @@
     'use strict';
 
     // dependencies
-    var dburl = 'localhost/mydb',
+    var dburl = 'localhost/mongoDemoDb',
         collections = ['streams'],
         mongojs = require('mongojs');
     var db = mongojs(dburl, collections);
@@ -43,13 +43,25 @@
         state: 0
     };
 
-    db.streams.save(dummyStream1, function(err, savedStream) {
-        if (err || !savedStream) {
-            console.log('Stream ' + savedStream + ' not save because of error ' + err);
-        } else {
-            console.log('Stream ' + savedStream.name + ' saved.');
-        }
-    });
+    var dummyStream2 = {
+        name: 'bar',
+        description: 'this is bar',
+        url: 'http://www.arte.tv',
+        state: 0
+    };
+
+    var saveIt = function(stream) {
+        db.streams.save(stream, function(err, savedStream) {
+            if (err || !savedStream) {
+                console.log('Stream ' + savedStream + ' not save because of error ' + err);
+            } else {
+                console.log('Stream ' + savedStream.name + ' saved.');
+            }
+        });
+    };
+
+    saveIt(dummyStream1);
+    saveIt(dummyStream2);
 
     db.streams.find(function(err, docs) {
         err && console.log(err);

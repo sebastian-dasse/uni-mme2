@@ -11,7 +11,7 @@
         bodyParser = require('body-parser'),
         app = express(),
         router = express.Router(),
-        stream = require('./stream').stream;
+        streams = require('./streams').streams;
 
     // some dummy data
     var dummmyStreamData = [{
@@ -33,7 +33,7 @@
         url: 'https://www.youtube.com/watch?v=2Qj8PhxSnhg',
         state: 0
     }];
-    stream.setData(dummmyStreamData);
+    streams.setData(dummmyStreamData);
 
     /**
      * Shows a welcome message.
@@ -52,16 +52,16 @@
 
 
     router.route('/streams')
-        .get(stream.getAll)
-        .post(stream.postAll)
-        .put(stream.putAll)
-        .delete(stream.deleteAll);
+        .get(streams.getAll)
+        .post(streams.postAll)
+        .put(streams.putAll);
+    // .delete(streams.deleteAll);
 
     router.route('/streams/:index')
-        .get(stream.getOne)
-        .post(stream.postOne)
-        .put(stream.putOne)
-        .delete(stream.deleteOne);
+        .get(streams.getOne)
+        // .post(streams.postOne)
+        .put(streams.putOne)
+        .delete(streams.deleteOne);
 
 
     // configure the server app

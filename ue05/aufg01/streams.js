@@ -24,23 +24,27 @@
      * A simple GET sends all streams.
      */
     streams.getAll = function(req, res, next) {
-        // res.send(streamData);
+        res.send(streamData);
 
         // if (req.query.name) console.log('query name was: ' + req.query.name)
 
-        var contains = function(query) {
-            return function(ele) {
-                for (var attr in ele) {
-                    if (query[attr] && ele[attr].indexOf(query[attr]) < 0) {
-                        return false;
-                    }
-                }
-                return true;
-            };
-        };
+        // var contains = function(query) {
+        //     return function(ele) {
+        //         for (var attr in ele) {
+        //             if (query[attr] && ele[attr].indexOf(query[attr]) < 0) {
+        //                 return false;
+        //             }
+        //         }
+        //         return true;
+        //     };
+        // };
+        // var filtered = streamData.filter(contains(req.query));
+        // res.send(filtered);
 
-        var filtered = streamData.filter(contains(req.query));
-        res.send(filtered);
+
+        // db.streams.find();
+
+        // res.send();
     };
 
     /**

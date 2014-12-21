@@ -19,9 +19,9 @@
             throw new ServerError('Required parameters were missing.', 400);
         }
         this.name = config.name;
-        this.description = config.description;
+        this.description = config.description || '';
         this.url = config.url;
-        this.state = config.state;
+        this.state = config.state || 0;
     };
 
     Stream.create = function(name, description, url, state) {

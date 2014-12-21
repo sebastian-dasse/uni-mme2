@@ -18,17 +18,16 @@ describe('The Stream module', function() {
         state = 0;
 
     it('should have a contructor', function() {
-        var config = {
+        var stream = new Stream({
             name: name,
             description: description,
             url: url,
             state: state
-        };
-        var stream = new Stream(config);
+        });
         expect(stream.name).toEqual(name);
         expect(stream.description).toEqual(description);
         expect(stream.url).toEqual(url);
-        expect(stream.state).toEqual(state);
+        expect(stream.state).toBe(state);
     });
 
     it('should have a static factory method', function() {
@@ -36,7 +35,7 @@ describe('The Stream module', function() {
         expect(stream.name).toEqual(name);
         expect(stream.description).toEqual(description);
         expect(stream.url).toEqual(url);
-        expect(stream.state).toEqual(state);
+        expect(stream.state).toBe(state);
     });
 
     it('should throw an error if name is not defined', function() {
@@ -55,6 +54,15 @@ describe('The Stream module', function() {
         expect(function() {
             new Stream();
         }).toThrow(new ServerError('Required parameters were missing.', 400));
+    });
+
+    it('should have default values for description and state', function() {
+        var stream = new Stream({
+            name: name,
+            url: url
+        });
+        expect(stream.description).toEqual('');
+        expect(stream.state).toBe(0);
     });
 
 });

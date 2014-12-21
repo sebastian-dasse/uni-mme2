@@ -41,20 +41,20 @@ describe('The Stream module', function() {
 
     it('should throw an error if name is not defined', function() {
         expect(function() {
-            Stream.create(null, description, url, state)
-        }).toThrow(new ServerError());
+            Stream.create(null, description, url, state);
+        }).toThrow(new ServerError('Required parameters were missing.', 400));
     });
 
     it('should throw an error if URL is not defined', function() {
         expect(function() {
-            Stream.create(name, description, null, state)
-        }).toThrow(new ServerError());
+            Stream.create(name, description, null, state);
+        }).toThrow(new ServerError('Required parameters were missing.', 400));
     });
 
     it('should throw an error if the constructor is called without configuration object', function() {
         expect(function() {
-            new Stream()
-        }).toThrow(new ServerError());
+            new Stream();
+        }).toThrow(new ServerError('Required parameters were missing.', 400));
     });
 
 });

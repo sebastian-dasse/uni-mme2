@@ -15,8 +15,8 @@
         if (!(this instanceof Stream)) {
             return new Stream(config);
         }
-        if (!config || !config.name || !config.url) {
-            throw new ServerError();
+        if (!(config && config.name && config.url)) {
+            throw new ServerError('Required parameters were missing.', 400);
         }
         this.name = config.name;
         this.description = config.description;

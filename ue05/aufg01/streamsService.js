@@ -23,18 +23,20 @@
             return mongojs.ObjectId(id);
         } catch (err) {
             console.log(err)
-            res.status(404).send(new ServerError(id + ' is no valid mongoDB ID.', 404));
+            res.status(404).send(new ServerError('No valid mongoDB ID: ' + id, 404));
         }
     };
 
-    var respondWith = function(res, okStatus, id) {
+    var respondWith = function(res, okStatus, id, callback) {
         return function(err, doc) {
             if (err) {
                 res.status(500).send(new ServerError(err, 500));
             } else if (!doc) {
-                res.status(404).send(new ServerError('No stream with ID ' + id + ' found.', 404));
+                res.status(404).send(new ServerError('No stream found with ID: ' + id, 404));
+            } else if (!callback) {
+                res.status(okStatus || 200).send(doc);
             } else {
-                res.status(okStatus).send(doc);
+                callback(doc);
             }
         };
     };
@@ -124,6 +126,13 @@
             res.status(400).send(new ServerError('You must specify at least one field to update.', 400));
             return;
         }
+
+        // streams.findOne({
+        //     _id: id
+        // }, respondWith(res, 204, id, function(doc) {
+        //     streams.remove(doc, respondWith(res, 204, id));
+        // }));
+
         streams.findAndModify({
             query: {
                 _id: id
@@ -154,9 +163,11 @@
         if (!id) {
             return;
         }
-        streams.remove({
+        streams.findOne({
             _id: id
-        }, respondWith(res, 204, id));
+        }, respondWith(res, 0, id, function(doc) {
+            streams.remove(doc, respondWith(res, 204));
+        }));
     };
 
     /**

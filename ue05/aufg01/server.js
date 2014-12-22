@@ -68,6 +68,10 @@
     app.use(bodyParser.json());
     app.use('/api/v1', router);
 
+    app.get('/', function(req, res) {
+        res.send('<h1>Welcome to the amazing MME2-Server</h1>Call "/api/v1/streams" for the REST service for streams');
+    });
+
     // start the server
     var server = app.listen(8000, function() {
         var host = server.address().address;

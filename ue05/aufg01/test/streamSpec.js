@@ -1,8 +1,8 @@
 describe('The Stream module', function() {
     'use strict';
 
-    var Stream = require('../Stream').Stream,
-        ServerError = require('../ServerError').ServerError;
+    var Stream = require('../js/Stream').Stream,
+        ServerError = require('../js/ServerError').ServerError;
 
     // beforeEach(function() {});
     // afterEach(function() {});

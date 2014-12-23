@@ -7,7 +7,7 @@
     "pretest": "npm install",
     "test": "jasmine-node --autotest --watch . --color --junitreport --output test/reports --verbose test/",
     "//": "For production the server should be started with 'node server.js'.",
-    "start": "nodemon server.js --ignore test/"
+    "start": "nodemon index.js --ignore test/"
   },
   "repository": {
     "type": "git",

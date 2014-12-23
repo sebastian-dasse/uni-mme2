@@ -1,7 +1,7 @@
 describe('The ServerError module', function() {
     'use strict';
 
-    var ServerError = require('../ServerError').ServerError;
+    var ServerError = require('../js/ServerError').ServerError;
 
     // beforeEach(function() {});
     // afterEach(function() {});

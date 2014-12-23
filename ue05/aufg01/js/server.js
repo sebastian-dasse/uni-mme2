@@ -13,28 +13,6 @@
         router = express.Router(),
         streamsService = require('./streamsService').streamsService;
 
-    // some dummy data
-    var dummmyStreamData = [{
-        // _id: '1',
-        name: 'foo',
-        description: 'this is foo',
-        url: 'https://www.youtube.com/watch?v=UDB-jm8MWro',
-        state: 0
-    }, {
-        // _id: '2',
-        name: 'bar',
-        description: 'this is bar',
-        url: 'https://www.youtube.com/watch?v=B7UmUX68KtE',
-        state: 0
-    }, {
-        // _id: '3',
-        name: 'baz',
-        description: 'this is baz',
-        url: 'https://www.youtube.com/watch?v=2Qj8PhxSnhg',
-        state: 0
-    }];
-    streamsService.setData(dummmyStreamData);
-
     /**
      * Shows a welcome message.
      */
@@ -49,7 +27,6 @@
         console.log('%s %s', req.method, req.url);
         next();
     });
-
 
     router.route('/streams')
         .get(streamsService.getAll)
@@ -72,16 +49,20 @@
         res.send('<h1>Welcome to the amazing MME2-Server</h1>Call "/api/v1/streams" for the REST service for streams');
     });
 
-    // start the server
-    var server = app.listen(8000, function() {
-        var host = server.address().address;
-        var port = server.address().port;
-        console.log('Serving at http://%s:%s', host, port);
-    });
+    /**
+     * Starts the server.
+     *
+     * @return {Function} the server
+     */
+    var serve = function() {
+        var server = app.listen(8000, function() {
+            var host = server.address().address;
+            var port = server.address().port;
+            console.log('Serving at http://%s:%s', host, port);
+        });
+        return server;
+    };
 
-    // module.exports = {
-    //     app: app,
-    //     router: router
-    // };
+    module.exports.serve = serve;
 
 }());

@@ -2,7 +2,7 @@ describe('The server module', function() {
     'use strict';
 
     var request = require('request'),
-        streamsService = require('../streamsService').streamsService,
+        streamsService = require('../js/streamsService').streamsService,
         dummyStreamsFactory = require('./dummyStreamsFactory'),
         url = 'http://localhost:8000/api/v1/streams/';
 

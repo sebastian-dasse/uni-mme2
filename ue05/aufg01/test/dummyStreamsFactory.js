@@ -34,7 +34,7 @@
         }];
     };
 
-    var initializeDb = function(log, whenDoneExec) {
+    var initializeDb = function(whenDoneExec, log) {
         streams.drop(function() {
             streams.insert(createStreams(), function(err, doc) {
                 if (err) {
@@ -74,9 +74,9 @@
      *      node ./test/dummyStreamsFactory.js --run
      */
     if (runOption) {
-        initializeDb(logOption, function() {
+        initializeDb(function() {
             db.close(); // QUESTION is it ok to do this?
-        });
+        }, logOption);
     }
 
 }());

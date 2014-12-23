@@ -7,28 +7,7 @@ describe('The server module', function() {
         url = 'http://localhost:8000/api/v1/streams/';
 
     beforeEach(function(done) {
-        var log = false;
-        dummyStreamsFactory.initializeDb(log, done);
-
-        // beforeEach(function(done) {
-        // var dummyStreams = [{
-        //     id: 'foo'
-        // }, {
-        //     id: 'bar'
-        // }, {
-        //     id: 'baz'
-        // }];
-
-        // streamsService.setData(dummyStreams);
-        // done();
-
-        // request.put({
-        //     url: url,
-        //     json: true,
-        //     body: dummyStreams
-        // }, function(err, response, body) {
-        //     done();
-        // });
+        dummyStreamsFactory.initializeDb(done);
     });
 
     // afterEach(function() {});
@@ -49,27 +28,17 @@ describe('The server module', function() {
             });
         });
 
-        var expectInvalidIdsToProcuceErrorFor = function(fn, done, opts) {
-            // var arr = [-1, 10000, 'abc', '123456789012345678901234'];
-            var arr = ['123456789012345678901234'];
-            var options = {
-                // url: url,
-                json: true
-            };
-            for (var opt in opts) {
-                options[opt] = opts[opt];
-            }
-            // done();
-            var numCalls = 0;
+        var expectInvalidIdsToProcuceErrorFor = function(fn, done, options) {
+            options = options || {};
+            options.json = true;
+            var arr = [-1, 10000, 'abc', '123456789012345678901234'],
+                numCalls = 0;
             arr.forEach(function(id) {
-                options.url = url + id
+                options.url = url + id;
                 fn(options, function(err, response, body) {
-                    numCalls++;
-                    console.log(response.statusCode)
-                    console.log(body)
-                    console.log('-------------------------')
                     expect(response.statusCode).toBe(404);
                     expect(body.type).toEqual('ServerError');
+                    numCalls++;
                     if (numCalls == arr.length) {
                         done();
                     }
@@ -79,48 +48,43 @@ describe('The server module', function() {
 
         describe('GET one', function() {
 
-            iit('should respond with an error for invalid indices', function(done) {
-                // expectInvalidIdsToProcuceErrorFor(request.get, done);
-
-                // expectInvalidIdsToProcuceErrorFor(request.del, done); // FIXME debugging
-                var reqOptions = {
-                    body: {
-                        name: 'foo'
-                    }
-                };
-                expectInvalidIdsToProcuceErrorFor(request.put, done, reqOptions); // FIXME debugging
-
+            it('should respond with an error for invalid IDs', function(done) {
+                expectInvalidIdsToProcuceErrorFor(request.get, done);
             });
 
-            it('should get the stream at the specified index position', function(done) {
-                var index = 0;
-
-                var expectGetStreamsAtIndexToEqual = function(index, expected, done) {
-                    request.get({
-                        url: url,
-                        json: true
-                    }, function(err, response, body) {
-                        expect(body[index]).toEqual(expected);
-                        done();
-                    });
-                };
-
+            it('should get the stream with the specified ID', function(done) {
                 request.get({
-                    url: url + index,
+                    url: url,
                     json: true
                 }, function(err, response, body) {
-                    expect(response.statusCode).toBe(200);
-                    expectGetStreamsAtIndexToEqual(index, body, done);
+                    var aStream = body[0];
+
+                    request.get({
+                        url: url + aStream._id,
+                        json: true
+                    }, function(err, response, body) {
+                        expect(response.statusCode).toBe(200);
+                        expect(body).toEqual(aStream);
+                        done();
+                    });
                 });
             });
 
         });
 
+        var haveEqualAttributes = function(obj, other) { // TODO -> reuse for updatedAttributesAreEqual
+            for (var attr in obj) {
+                if (obj[attr] != other[attr]) {
+                    return false;
+                }
+            }
+            return true;
+        };
+
         describe('POST all', function() {
 
-            it('should create a new stream at the end of the list', function(done) {
+            it('should create a new stream', function(done) {
                 var newStream = {
-                    _id: '9',
                     name: 'fresh',
                     description: 'so fresh',
                     url: 'https://www.youtube.com/watch?v=UDB-jm8MWro',
@@ -132,9 +96,17 @@ describe('The server module', function() {
                     json: true,
                     body: newStream
                 }, function(err, response, body) {
+                    var posted = body;
                     expect(response.statusCode).toBe(201);
-                    expect(body).toEqual(newStream);
-                    done();
+                    expect(haveEqualAttributes(newStream, posted)).toBe(true);
+
+                    request.get({
+                        url: url + posted._id,
+                        json: true
+                    }, function(err, response, body) {
+                        expect(body).toEqual(posted);
+                        done();
+                    })
                 });
             });
 
@@ -170,80 +142,69 @@ describe('The server module', function() {
                 });
             });
 
-            it('should update the list with the passed array', function(done) {
-                var newStreams = [{
-                    id: 'foo'
-                }, {
-                    id: 'bar'
-                }];
+            // it('should update the list with the passed array', function(done) {
+            //     var newStreams = [{
+            //         id: 'foo'
+            //     }, {
+            //         id: 'bar'
+            //     }];
 
-                var expectGetStreamsToEqual = function(expected, done) {
-                    request.get({
-                        url: url,
-                        json: true
-                    }, function(err, response, body) {
-                        expect(body).toEqual(expected);
-                        done();
-                    });
-                };
+            //     var expectGetStreamsToEqual = function(expected, done) {
+            //         request.get({
+            //             url: url,
+            //             json: true
+            //         }, function(err, response, body) {
+            //             expect(body).toEqual(expected);
+            //             done();
+            //         });
+            //     };
 
-                request.put({
-                    url: url,
-                    json: true,
-                    body: newStreams
-                }, function(err, response, body) {
-                    expect(response.statusCode).toBe(201);
-                    expect(body).toEqual(newStreams, done);
-                    expectGetStreamsToEqual(newStreams, done);
-                });
+            //     request.put({
+            //         url: url,
+            //         json: true,
+            //         body: newStreams
+            //     }, function(err, response, body) {
+            //         expect(response.statusCode).toBe(201);
+            //         expect(body).toEqual(newStreams, done);
+            //         expectGetStreamsToEqual(newStreams, done);
+            //     });
 
-            });
+            // });
 
         });
 
         describe('PUT one', function() {
 
-            it('should respond with an error for invalid indices', function(done) {
+            it('should respond with an error for invalid IDs', function(done) {
                 var reqOptions = {
                     body: {
                         name: 'foo'
                     }
                 };
                 expectInvalidIdsToProcuceErrorFor(request.put, done, reqOptions);
-                // [-1, 10000, 'abc'].forEach(function(index) {
-                //     request.put({
-                //         url: url + index,
-                //         json: true,
-                //         body: {}
-                //     }, function(err, response, body) {
-                //         expect(response.statusCode).toBe(404);
-                //         expect(body.type).toEqual('ServerError');
-                //         done();
-                //     });
-                // });
             });
 
             it('should not modify the total number of streams', function(done) {
-                var originalNumber,
-                    newNumber;
-
                 request.get({
                     url: url,
                     json: true
                 }, function(err, response, body) {
-                    originalNumber = body.length;
+                    var originalNumber = body.length,
+                        aStream = body[0];
 
                     request.put({
-                        url: url + '0',
+                        url: url + aStream._id,
                         json: true,
-                        body: {}
+                        body: {
+                            name: 'updated'
+                        }
                     }, function(err, response, body) {
 
                         request.get({
                             url: url,
                             json: true
                         }, function(err, response, body) {
-                            newNumber = body.length;
+                            var newNumber = body.length;
 
                             expect(newNumber).toBe(originalNumber);
                             done();
@@ -253,39 +214,35 @@ describe('The server module', function() {
             });
         });
 
-        it('should update the stream at the specified index position', function(done) {
+        // TODO check if attributes that are not specified in the update stay unaltered
+        it('should update the stream with the specified ID', function(done) {
             var streamUpdate = {
-                    _id: '12',
-                    name: 'updated',
-                    description: 'freshly updated',
-                    // url: 'https://www.youtube.com/watch?v=UDB-jm8MWro',
-                    state: 0
-                },
-                index = 0;
-
-            var updatedAttributesAreEqual = function(updated, update) {
-                for (var attr in update) {
-                    if (updated[attr] != update[attr]) {
-                        return false;
-                    }
-                }
-                return true;
+                name: 'updated',
+                description: 'freshly updated',
+                state: 123
             };
 
-            request.put({
-                url: url + index,
-                json: true,
-                body: streamUpdate
+            request.get({
+                url: url,
+                json: true
             }, function(err, response, body) {
-                expect(response.statusCode).toBe(200);
-                expect(updatedAttributesAreEqual(body, streamUpdate)).toBe(true);
+                var aStream = body[0];
 
-                request.get({
-                    url: url + index,
-                    json: true
+                request.put({
+                    url: url + aStream._id,
+                    json: true,
+                    body: streamUpdate
                 }, function(err, response, body) {
-                    expect(updatedAttributesAreEqual(body, streamUpdate)).toBe(true);
-                    done();
+                    expect(response.statusCode).toBe(200);
+                    expect(haveEqualAttributes(streamUpdate, body)).toBe(true);
+
+                    request.get({
+                        url: url + aStream._id,
+                        json: true
+                    }, function(err, response, body) {
+                        expect(haveEqualAttributes(streamUpdate, body)).toBe(true);
+                        done();
+                    });
                 });
             });
         });
@@ -315,36 +272,33 @@ describe('The server module', function() {
 
         describe('DELETE one', function() {
 
-            it('should respond with an error for invalid indices', function(done) {
+            it('should respond with an error for invalid IDs', function(done) {
                 expectInvalidIdsToProcuceErrorFor(request.del, done);
-                // [-1, 10000, 'abc'].forEach(function(index) {
-                //     request.del({
-                //         url: url + index,
-                //         json: true
-                //     }, function(err, response, body) {
-                //         expect(response.statusCode).toBe(404);
-                //         expect(body.type).toEqual('ServerError');
-                //         done();
-                //     });
-                // });
             });
 
             it('should delete the stream with the specified index position', function(done) {
                 var index = 0;
 
-                request.del({
-                    url: url + index,
+                request.get({
+                    url: url,
                     json: true
                 }, function(err, response, body) {
-                    expect(response.statusCode).toBe(204);
+                    var aStream = body[0];
 
-                    request.get({
-                        url: url + index,
+                    request.del({
+                        url: url + aStream._id,
                         json: true
                     }, function(err, response, body) {
-                        expect(response.statusCode).toBe(404);
-                        expect(body.type).toEqual('ServerError');
-                        done();
+                        expect(response.statusCode).toBe(204);
+
+                        request.get({
+                            url: url + aStream._id,
+                            json: true
+                        }, function(err, response, body) {
+                            expect(response.statusCode).toBe(404);
+                            expect(body.type).toEqual('ServerError');
+                            done();
+                        });
                     });
                 });
             });

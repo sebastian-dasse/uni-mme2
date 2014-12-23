@@ -22,8 +22,7 @@
         try {
             return mongojs.ObjectId(id);
         } catch (err) {
-            console.log(err)
-            res.status(404).send(new ServerError('No valid mongoDB ID: ' + id, 404));
+            console.log(err);
         }
     };
 
@@ -62,9 +61,6 @@
      */
     streamsService.getOne = function(req, res, next) {
         var id = toMongoId(req.params._id, res);
-        if (!id) {
-            return;
-        }
         streams.findOne({
             _id: id
         }, respondWith(res, 200, id));
@@ -119,20 +115,10 @@
     streamsService.putOne = function(req, res, next) {
         var updateObj = req.body,
             id = toMongoId(req.params._id, res);
-        if (!id) {
-            return;
-        }
         if (hasNoAttributes(updateObj)) {
             res.status(400).send(new ServerError('You must specify at least one field to update.', 400));
             return;
         }
-
-        // streams.findOne({
-        //     _id: id
-        // }, respondWith(res, 204, id, function(doc) {
-        //     streams.remove(doc, respondWith(res, 204, id));
-        // }));
-
         streams.findAndModify({
             query: {
                 _id: id
@@ -160,9 +146,6 @@
      */
     streamsService.deleteOne = function(req, res, next) {
         var id = toMongoId(req.params._id, res);
-        if (!id) {
-            return;
-        }
         streams.findOne({
             _id: id
         }, respondWith(res, 0, id, function(doc) {
@@ -171,6 +154,8 @@
     };
 
     /**
+     * TODO remove if unused
+     *
      * Sets the stream data.
      */
     streamsService.setData = function(newData) {
@@ -183,6 +168,8 @@
     };
 
     /**
+     * TODO remove if unused
+     *
      * Gets the stream data.
      */
     streamsService.getData = function() {

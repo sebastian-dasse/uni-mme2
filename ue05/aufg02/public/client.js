@@ -3,7 +3,8 @@
 
     var baseUrl = 'http://localhost:8000/api/v1/streams/',
         console = window.console,
-        LOG = false;
+        queryString = '',
+        LOG = true;
 
     window.onload = function() {
         addEventListeners();
@@ -11,26 +12,30 @@
     };
 
     var addEventListeners = function() {
-        document.getElementById('btnCreate').addEventListener('click', doCreate);
-        document.getElementById('btnUpdate').addEventListener('click', doUpdate);
-        document.getElementById('btnDelete').addEventListener('click', doDelete);
-    }
+        document.getElementById('btnCreate').addEventListener('click', doCreateStream);
+        document.getElementById('btnUpdate').addEventListener('click', doUpdateStream);
+        document.getElementById('btnDelete').addEventListener('click', doDeleteStream);
+        document.getElementById('btnFilter').addEventListener('click', filterOn);
+        document.getElementById('btnNoFilter').addEventListener('click', filterOff);
+    };
 
     var callHttp = function(method, options, callback) {
         options = options || {};
-        var url = baseUrl + (options.id || ''),
+        var url = baseUrl + (options.id || options.query || ''),
             okStatus = options.okStatus || 200,
-            toSend;
-        var xmlhttp = new XMLHttpRequest();
+            toSend = null,
+            xmlhttp = new XMLHttpRequest();
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState != 4) {
                 return;
             }
             var responseText = xmlhttp.responseText,
-                response = responseText ? JSON.parse(responseText) : '';
-            if (LOG) console.log('%s %s %d (%s)', method, url, xmlhttp.status, xmlhttp.statusText);
+                response = responseText ? JSON.parse(responseText) : '(no response)';
             if (xmlhttp.status == okStatus) {
-                if (LOG) console.log('%o', response);
+                if (LOG) {
+                    console.log('%s %s %d (%s) with response:', method, url, xmlhttp.status, xmlhttp.statusText);
+                    console.log(response);
+                }
                 if (callback) {
                     callback(response);
                 }
@@ -66,23 +71,25 @@
     };
 
     var getAllStreams = function() {
-        callHttp('GET', {}, function(streams) {
+        callHttp('GET', {
+            query: queryString
+        }, function(streams) {
             var streamsTable = document.getElementById('streams');
             clearTable(streamsTable);
             fillTable(streamsTable, streams);
         });
     };
 
-    var clearInput = function() {
-        var inFormElements = document.forms.inForm.elements;
-        for (var i = 0, len = inFormElements.length; i < len; i++) {
-            inFormElements[i].value = '';
+    var clearForm = function(form) {
+        var formElements = document.forms[form].elements;
+        for (var i = 0, len = formElements.length; i < len; i++) {
+            formElements[i].value = '';
         }
     };
 
     var refreshView = function() {
         getAllStreams();
-        clearInput();
+        clearForm('inForm');
     };
 
     var postStream = function(stream) {
@@ -110,37 +117,72 @@
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
 
-    var getValFromInputForm = function(list, attr) {
-        return list['in' + capitalizeFirstChar(attr)].value;
+    var getValFrom = function(inFormElements, attr) {
+        var val = inFormElements['in' + capitalizeFirstChar(attr)].value;
+        return isNaN(val) ? val : parseInt(val);
     };
 
-    var createObjFromInputForm = function(inForm) {
-        var obj = {},
-            inFormElements = inForm.elements,
-            attrs = ['name', 'description', 'url', 'state'];
-        for (var i = 0, len = attrs.length; i < len; i++) {
-            var attr = attrs[i],
-                val = getValFromInputForm(inFormElements, attr);
+    var setAttributesFromInputFormFor = function(obj) {
+        var inFormElements = document.forms.inForm.elements;
+        return function(attr) {
+            var val = getValFrom(inFormElements, attr);
             if (val) {
                 obj[attr] = val;
             }
+        };
+    };
+
+    var createObjFromInputForm = function() {
+        var attrs = ['name', 'description', 'url', 'state'],
+            obj = {},
+            setAttr = setAttributesFromInputFormFor(obj);
+        for (var i = 0, len = attrs.length; i < len; i++) {
+            setAttr(attrs[i]);
         }
         return obj;
     };
 
-    var doCreate = function() {
-        postStream(createObjFromInputForm(document.forms.inForm));
+    var doCreateStream = function() {
+        postStream(createObjFromInputForm());
     };
 
-    var doUpdate = function() {
-        var inForm = document.forms.inForm,
-            id = inForm.elements.inId.value,
-            update = createObjFromInputForm(inForm);
-        putStream(id, update);
+    var doUpdateStream = function() {
+        var id = document.forms.inForm.elements.inId.value;
+        putStream(id, createObjFromInputForm());
     };
 
-    var doDelete = function() {
-        deleteStream(document.forms.inForm.elements.inId.value);
+    var doDeleteStream = function() {
+        var id = document.forms.inForm.elements.inId.value;
+        deleteStream(id);
+    };
+
+    var createQueryFromFilterForm = function() {
+        var filterFormElements = document.forms.filterForm.elements,
+            filterSelect = filterFormElements.filterSelect,
+            selected = filterSelect.options[filterSelect.selectedIndex],
+            searchString = filterFormElements.filterFilter.value;
+        if (selected && searchString) {
+            return '?' + selected.value.toLowerCase() + '=' + searchString.replace(/\s+/g, '+').toLowerCase();
+        }
+    };
+
+    var setQuery = function() {
+        queryString = createQueryFromFilterForm();
+    };
+
+    var clearQuery = function() {
+        queryString = '';
+    };
+
+    var filterOn = function() {
+        setQuery();
+        getAllStreams();
+    };
+
+    var filterOff = function() {
+        clearForm('filterForm');
+        clearQuery();
+        getAllStreams();
     };
 
 }());

@@ -40,6 +40,11 @@
         };
     };
 
+    /** Returns a case-insensitive regex or an int number. */
+    var parseParam = function(value) {
+        return isNaN(value) ? new RegExp(value, 'i') : parseInt(value);
+    };
+
     /**
      * A simple GET sends all streams.
      */
@@ -47,8 +52,7 @@
         var reqQuery = req.query,
             dbQuery = {};
         for (var param in reqQuery) {
-            var value = reqQuery[param];
-            dbQuery[param] = isNaN(value) ? new RegExp(value) : parseInt(value);
+            dbQuery[param] = parseParam(reqQuery[param]);
         }
         db.streams.find(dbQuery, respondWith(res, 200));
     };

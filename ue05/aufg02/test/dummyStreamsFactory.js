@@ -14,19 +14,16 @@
     // some dummy data
     var createStreams = function() {
         return [{
-            // _id: '1',
             name: 'foo',
             description: 'this is foo',
             url: 'https://www.youtube.com/watch?v=UDB-jm8MWro',
             state: 0
         }, {
-            // _id: '2',
             name: 'bar',
             description: 'this is bar',
             url: 'https://www.youtube.com/watch?v=B7UmUX68KtE',
             state: 0
         }, {
-            // _id: '3',
             name: 'baz',
             description: 'this is baz',
             url: 'https://www.youtube.com/watch?v=2Qj8PhxSnhg',
@@ -38,8 +35,8 @@
         streams.drop(function() {
             streams.insert(createStreams(), function(err, doc) {
                 if (err) {
-                    console.log('Could not initialize DB.'); // TODO should throw error
-                    console.log(err);
+                    console.error('Could not initialize DB.'); // TODO should throw error
+                    console.error(err);
                 }
                 if (log) {
                     console.log('Initialized DB with some dummy data (' + doc.length + ' documents).');

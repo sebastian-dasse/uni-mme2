@@ -72,7 +72,7 @@ describe('The server module', function() {
 
         });
 
-        var haveEqualAttributes = function(obj, other) { // TODO -> reuse for updatedAttributesAreEqual
+        var haveEqualAttributes = function(obj, other) {
             for (var attr in obj) {
                 if (obj[attr] != other[attr]) {
                     return false;
@@ -106,7 +106,7 @@ describe('The server module', function() {
                     }, function(err, response, body) {
                         expect(body).toEqual(posted);
                         done();
-                    })
+                    });
                 });
             });
 
@@ -128,50 +128,50 @@ describe('The server module', function() {
 
         // });
 
-        describe('PUT all', function() {
+        // describe('PUT all', function() {
 
-            it('should only accept an array', function(done) {
-                request.put({
-                    url: url,
-                    json: true,
-                    body: 'no array'
-                }, function(err, response, body) {
-                    expect(response.statusCode).toBe(400);
-                    expect(body.type).toEqual('ServerError');
-                    done();
-                });
-            });
+        //     it('should only accept an array', function(done) {
+        //         request.put({
+        //             url: url,
+        //             json: true,
+        //             body: 'no array'
+        //         }, function(err, response, body) {
+        //             expect(response.statusCode).toBe(400);
+        //             expect(body.type).toEqual('ServerError');
+        //             done();
+        //         });
+        //     });
 
-            // it('should update the list with the passed array', function(done) {
-            //     var newStreams = [{
-            //         id: 'foo'
-            //     }, {
-            //         id: 'bar'
-            //     }];
+        //     // it('should update the list with the passed array', function(done) {
+        //     //     var newStreams = [{
+        //     //         id: 'foo'
+        //     //     }, {
+        //     //         id: 'bar'
+        //     //     }];
 
-            //     var expectGetStreamsToEqual = function(expected, done) {
-            //         request.get({
-            //             url: url,
-            //             json: true
-            //         }, function(err, response, body) {
-            //             expect(body).toEqual(expected);
-            //             done();
-            //         });
-            //     };
+        //     //     var expectGetStreamsToEqual = function(expected, done) {
+        //     //         request.get({
+        //     //             url: url,
+        //     //             json: true
+        //     //         }, function(err, response, body) {
+        //     //             expect(body).toEqual(expected);
+        //     //             done();
+        //     //         });
+        //     //     };
 
-            //     request.put({
-            //         url: url,
-            //         json: true,
-            //         body: newStreams
-            //     }, function(err, response, body) {
-            //         expect(response.statusCode).toBe(201);
-            //         expect(body).toEqual(newStreams, done);
-            //         expectGetStreamsToEqual(newStreams, done);
-            //     });
+        //     //     request.put({
+        //     //         url: url,
+        //     //         json: true,
+        //     //         body: newStreams
+        //     //     }, function(err, response, body) {
+        //     //         expect(response.statusCode).toBe(201);
+        //     //         expect(body).toEqual(newStreams, done);
+        //     //         expectGetStreamsToEqual(newStreams, done);
+        //     //     });
 
-            // });
+        //     // });
 
-        });
+        // });
 
         describe('PUT one', function() {
 
@@ -276,9 +276,7 @@ describe('The server module', function() {
                 expectInvalidIdsToProcuceErrorFor(request.del, done);
             });
 
-            it('should delete the stream with the specified index position', function(done) {
-                var index = 0;
-
+            it('should delete the stream with the specified ID', function(done) {
                 request.get({
                     url: url,
                     json: true

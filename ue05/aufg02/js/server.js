@@ -13,13 +13,6 @@
         router = express.Router(),
         streamsService = require('./streamsService').streamsService;
 
-    // /**
-    //  * Shows a welcome message.
-    //  */
-    // router.get('/', function(req, res) {
-    //     res.send('<h1>The amazing MME2-Server</h1>call "/api/v1/streams" for the REST service');
-    // });
-
     /**
      * Logs some parameters of every HTTP request.
      */
@@ -31,8 +24,8 @@
     router.route('/streams')
         .get(streamsService.getAll)
         .post(streamsService.postAll)
-        .put(streamsService.putAll);
-    // .delete(streamsService.deleteAll);
+        // .put(streamsService.putAll);
+        // .delete(streamsService.deleteAll);
 
     router.route('/streams/:_id')
         .get(streamsService.getOne)
@@ -40,16 +33,17 @@
         .put(streamsService.putOne)
         .delete(streamsService.deleteOne);
 
-
     // configure the server app
     app.use(bodyParser.json());
     app.use('/api/v1', router);
 
-    // app.get('/', function(req, res) {
-    //     res.send('<h1>Welcome to the amazing MME2-Server</h1>Call "/api/v1/streams" for the REST service for streams');
-    // });
-
     app.use(express.static('public'));
+
+    app.use(function(req, res) {
+        res.status(404).send('<h1>Not Found</h1><p>The requested URL ' + req.url +
+            ' was not found on this server.</p><hr>' +
+            'For the REST service for streams call /api/v1/streams');
+    });
 
     /**
      * Starts the server.

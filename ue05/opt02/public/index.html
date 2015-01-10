@@ -8,6 +8,30 @@
 
     <h1>The amazing MME2-Stream-Server</h1>
 
+    <form id="filterForm">
+        <p>
+            <select id="filterSelect" size="1">
+                <option>Name</option>
+                <option>Description</option>
+                <option>URL</option>
+                <option>State</option>
+            </select>
+            <label for="filterFilter">Filter:</label>
+            <input id="filterFilter" type="text">
+            <input id="btnFilter" type="button" value= "Filter" />
+            <input id="btnNoFilter" type="button" value="No Filter" />
+        </p>
+    </form>
+
+    <form id="showForm">
+        <p>
+            <label for="showId">ID:</label>
+            <input id="showId" type="text" />
+            <input id="btnShowOne" type="button" value="Show One By ID" />
+            <input id="btnShowAll" type="button" value="Show All" />
+        </p>
+    </form>
+
     <table id="streams" width="75%" height="25%" border="1">
         <tr>
             <th>_id</th>
@@ -36,30 +60,6 @@
             <button id="btnUpdate" type="button">Update</button>
             <button id="btnDelete" type="button">Delete</button>
         </div>
-    </form>
-
-    <form id="filterForm">
-        <p>
-            <select id="filterSelect" size="1">
-                <option>Name</option>
-                <option>Description</option>
-                <option>URL</option>
-                <option>State</option>
-            </select>
-            <label for="filterFilter">Filter:</label>
-            <input id="filterFilter" type="text">
-            <input id="btnFilter" type="button" value= "Filter" />
-            <input id="btnNoFilter" type="button" value="No Filter" />
-        </p>
-    </form>
-
-    <form id="showForm">
-        <p>
-            <label for="showId">ID:</label>
-            <input id="showId" type="text" />
-            <input id="btnShowOne" type="button" value="Show One By ID" />
-            <input id="btnShowAll" type="button" value="Show All" />
-        </p>
     </form>
 
 </body>

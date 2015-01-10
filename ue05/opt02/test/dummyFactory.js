@@ -1,5 +1,5 @@
 /**
- * A dummy factory for the entity "stream".
+ * A dummy factory for the entities "stream" and "event".
  *
  * @author Sebastian Dass&eacute;
  */
@@ -9,10 +9,8 @@
     // dependencies
     var mongoose = require('mongoose'),
         conn = mongoose.connect('mongodb://localhost/mmeDb'),
-        // streams = db.streams; //  --> replace with mongoose.model
-        // StreamSchema = require('../js/Stream').StreamSchema,
-        // StreamModel = mongoose.model('Stream', StreamSchema);
-        StreamModel = require('../js/Stream').StreamModel;
+        StreamModel = require('../js/models/Stream').StreamModel,
+        EventModel = require('../js/models/Event').EventModel;
 
     // some dummy data
     var createStreams = function() {
@@ -34,32 +32,35 @@
         }];
     };
 
-    var initializeDb = function(whenDoneExec, log) {
-        mongoose.connection.collections['streams' /*, 'somes'*/ ].drop(function() {
-            StreamModel.create(createStreams(), function(err, doc) {
-                if (err) {
-                    console.error('Could not initialize DB.'); // TODO should throw error
-                    console.error(err);
-                }
-            }).then(function() {
-                if (log) {
-                    console.log('Initialized DB with some dummy data (' + arguments.length + ' documents).');
-                }
-                if (whenDoneExec) {
-                    whenDoneExec();
-                }
-            });
-            // SomeModel.create({
-            //     name: 'Karl',
-            //     extra: 'this is extra'
-            // });
-        });
+    var createEvents = function() {
+        return [{
+            name: 'Gartenparty',
+            description: 'Bringt bitte etwas zu trinken mit.'
+        }, {
+            name: 'Opernball',
+            description: 'Dresscode: Frack bzw. Abendkleid'
+        }, {
+            name: 'Lesung',
+            description: 'Jonathan Franzen liest aus seinem aktuellen Buch.'
+        }];
+    };
 
+    var initializeDb = function(whenDoneExec, log) {
+        mongoose.connection.collections['streams'].drop();
+        mongoose.connection.collections['events'].drop();
+        StreamModel.create(createStreams()).then(function() {
+            if (log) console.log('Initialized DB with some dummy streams (' + arguments.length + ').');
+            EventModel.create(createEvents()).then(function() {
+                if (log) console.log('Initialized DB with some dummy events (' + arguments.length + ').');
+                if (whenDoneExec) whenDoneExec();
+            });
+        });
     };
 
     module.exports = {
         initializeDb: initializeDb,
-        createStreams: createStreams
+        createStreams: createStreams,
+        createEvents: createEvents
     };
 
 

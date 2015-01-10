@@ -1,5 +1,5 @@
 /**
- * A simple REST API for the entity "stream".
+ * A simple REST API for the entities "stream" and "event".
  *
  * @author Sebastian Dass&eacute;
  */
@@ -9,23 +9,17 @@
     var mongoose = require('mongoose'),
         conn = mongoose.connect('mongodb://localhost/mmeDb'),
         ObjectId = mongoose.Types.ObjectId,
-        StreamModel = require('./Stream').StreamModel,
+        StreamModel = require('./models/Stream').StreamModel,
+        EventModel = require('./models/Event').EventModel,
         ServerError = require('./ServerError').ServerError;
 
-
-    var streamsService = {};
-
-    module.exports = {
-        streamsService: streamsService
+    var models = {
+        Stream: StreamModel,
+        Event: EventModel
     };
 
-    var toMongoId = function(id) {
-        try {
-            return new ObjectId(id);
-        } catch (err) {
-            console.log(err);
-        }
-    };
+    var restService = {};
+    module.exports.restService = restService;
 
     var respondWith = function(res, okStatus, id, callback) {
         return function(err, doc) {
@@ -48,6 +42,12 @@
         };
     };
 
+    var hexregex = new RegExp("^[0-9a-fA-F]{24}$");
+
+    var isMongoId = function(id) {
+        return hexregex.test(id);
+    };
+
     /** Returns a case-insensitive regex or an int number. */
     var parseParam = function(value) {
         return isNaN(value) ? new RegExp(value, 'i') : parseInt(value);
@@ -58,13 +58,16 @@
      * based on the given query, if a query object was passed.
      * @param {Number} [req.query] a query object
      */
-    streamsService.getAll = function(req, res, next) {
-        var reqQuery = req.query,
-            dbQuery = {};
-        for (var param in reqQuery) {
-            dbQuery[param] = parseParam(reqQuery[param]);
-        }
-        StreamModel.find(dbQuery, respondWith(res, 200));
+    restService.getAll = function(modelName) {
+        var Model = models[modelName];
+        return function(req, res, next) {
+            var reqQuery = req.query,
+                dbQuery = {};
+            for (var param in reqQuery) {
+                dbQuery[param] = parseParam(reqQuery[param]);
+            }
+            Model.find(dbQuery, respondWith(res, 200));
+        };
     };
 
     /**
@@ -73,9 +76,16 @@
      * ServerError with status 404.
      * @param {Number} req.params._id the stream ID
      */
-    streamsService.getOne = function(req, res, next) {
-        var id = toMongoId(req.params._id);
-        StreamModel.findById(id, respondWith(res, 200, id));
+    restService.getOne = function(modelName) {
+        var Model = models[modelName];
+        return function(req, res, next) {
+            var id = req.params._id;
+            if (!isMongoId(id)) {
+                res.status(404).send(new ServerError('Not a legal MongoDb ObjectId: ' + id, 404));
+                return;
+            }
+            Model.findById(new ObjectId(id), respondWith(res, 200, id));
+        };
     };
 
     /**
@@ -84,9 +94,12 @@
      * with a ServerError with status 400.
      * @param {Object} req.body the update object
      */
-    streamsService.postAll = function(req, res, next) {
-        var newStream = req.body;
-        StreamModel.create(newStream, respondWith(res, 201));
+    restService.postAll = function(modelName) {
+        var Model = models[modelName];
+        return function(req, res, next) {
+            var newStream = req.body;
+            Model.create(newStream, respondWith(res, 201));
+        };
     };
 
     var hasNoAttributes = function(obj) {
@@ -101,14 +114,21 @@
      * @param {Number} req.params._id the stream ID
      * @param {Object} req.body the update object
      */
-    streamsService.putOne = function(req, res, next) {
-        var updateObj = req.body,
-            id = toMongoId(req.params._id);
-        if (hasNoAttributes(updateObj)) {
-            res.status(400).send(new ServerError('You must specify at least one field to update.', 400));
-            return;
-        }
-        StreamModel.findByIdAndUpdate(id, updateObj, respondWith(res, 200, id));
+    restService.putOne = function(modelName) {
+        var Model = models[modelName];
+        return function(req, res, next) {
+            var updateObj = req.body,
+                id = req.params._id;
+            if (!isMongoId(id)) {
+                res.status(404).send(new ServerError('Not a legal MongoDb ObjectId: ' + id, 404));
+                return;
+            }
+            if (hasNoAttributes(updateObj)) {
+                res.status(400).send(new ServerError('You must specify at least one field to update.', 400));
+                return;
+            }
+            Model.findByIdAndUpdate(new ObjectId(id), updateObj, respondWith(res, 200, id));
+        };
     };
 
     /**
@@ -117,9 +137,16 @@
      * ServerError with status 404.
      * @param {Number} req.params._id the stream ID
      */
-    streamsService.deleteOne = function(req, res, next) {
-        var id = toMongoId(req.params._id);
-        StreamModel.findByIdAndRemove(id, respondWith(res, 204, id));
+    restService.deleteOne = function(modelName) {
+        var Model = models[modelName];
+        return function(req, res, next) {
+            var id = req.params._id;
+            if (!isMongoId(id)) {
+                res.status(404).send(new ServerError('Not a legal MongoDb ObjectId: ' + id, 404));
+                return;
+            }
+            Model.findByIdAndRemove(new ObjectId(id), respondWith(res, 204, id));
+        };
     };
 
 }());

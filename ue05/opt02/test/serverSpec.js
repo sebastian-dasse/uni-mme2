@@ -2,12 +2,12 @@ describe('The server module', function() {
     'use strict';
 
     var request = require('request'),
-        streamsService = require('../js/streamsService').streamsService,
-        dummyStreamsFactory = require('./dummyStreamsFactory'),
+        // restService = require('../js/restService').restService,
+        dummyFactory = require('./dummyFactory'),
         url = 'http://localhost:8000/api/v1/streams/';
 
     beforeEach(function(done) {
-        dummyStreamsFactory.initializeDb(done);
+        dummyFactory.initializeDb(done);
     });
 
     // afterEach(function() {});
@@ -112,66 +112,20 @@ describe('The server module', function() {
 
         });
 
-        // describe('POST one', function() {
+        describe('POST one', function() {
 
-        //     it('should not be allowed ', function(done) {
-        //         request.post({
-        //             url: url + '1',
-        //             json: true,
-        //             body: {}
-        //         }, function(err, response, body) {
-        //             expect(response.statusCode).toBe(405);
-        //             expect(body.type).toEqual('ServerError');
-        //             done();
-        //         });
-        //     });
+            it('should not be allowed ', function(done) {
+                request.post({
+                    url: url + '1',
+                    json: true,
+                    body: {}
+                }, function(err, response, body) {
+                    expect(response.statusCode).toBe(404);
+                    done();
+                });
+            });
 
-        // });
-
-        // describe('PUT all', function() {
-
-        //     it('should only accept an array', function(done) {
-        //         request.put({
-        //             url: url,
-        //             json: true,
-        //             body: 'no array'
-        //         }, function(err, response, body) {
-        //             expect(response.statusCode).toBe(400);
-        //             expect(body.type).toEqual('ServerError');
-        //             done();
-        //         });
-        //     });
-
-        //     // it('should update the list with the passed array', function(done) {
-        //     //     var newStreams = [{
-        //     //         id: 'foo'
-        //     //     }, {
-        //     //         id: 'bar'
-        //     //     }];
-
-        //     //     var expectGetStreamsToEqual = function(expected, done) {
-        //     //         request.get({
-        //     //             url: url,
-        //     //             json: true
-        //     //         }, function(err, response, body) {
-        //     //             expect(body).toEqual(expected);
-        //     //             done();
-        //     //         });
-        //     //     };
-
-        //     //     request.put({
-        //     //         url: url,
-        //     //         json: true,
-        //     //         body: newStreams
-        //     //     }, function(err, response, body) {
-        //     //         expect(response.statusCode).toBe(201);
-        //     //         expect(body).toEqual(newStreams, done);
-        //     //         expectGetStreamsToEqual(newStreams, done);
-        //     //     });
-
-        //     // });
-
-        // });
+        });
 
         describe('PUT one', function() {
 
@@ -246,29 +200,6 @@ describe('The server module', function() {
                 });
             });
         });
-
-        // it('should only update the specified attributes', function(done) {}); // TODO
-
-        // describe('DELETE all', function() {
-
-        //     it('should delete all streams', function(done) {
-        //         request.del({
-        //             url: url
-        //         }, function(err, response, body) {
-        //             expect(response.statusCode).toBe(204);
-
-        //             request.get({
-        //                 url: url,
-        //                 json: true
-        //             }, function(err, response, body) {
-        //                 expect(Array.isArray(body)).toBe(true);
-        //                 expect(body.length).toBe(0);
-        //                 done();
-        //             });
-        //         });
-        //     });
-
-        // });
 
         describe('DELETE one', function() {
 

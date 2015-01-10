@@ -1,5 +1,5 @@
 /**
- * A simple REST server for the entity "stream".
+ * A simple REST server for the entities "stream" and "event".
  *
  * @author Sebastian Dass&eacute;
  */
@@ -11,7 +11,9 @@
         bodyParser = require('body-parser'),
         app = express(),
         router = express.Router(),
-        streamsService = require('./streamsService').streamsService;
+        restService = require('./restService').restService
+        //, eventsService = require('./eventsService').eventsService
+    ;
 
     /**
      * Logs some parameters of every HTTP request.
@@ -22,16 +24,22 @@
     });
 
     router.route('/streams')
-        .get(streamsService.getAll)
-        .post(streamsService.postAll)
-        // .put(streamsService.putAll);
-        // .delete(streamsService.deleteAll);
+        .get(restService.getAll('Stream'))
+        .post(restService.postAll('Stream'));
 
     router.route('/streams/:_id')
-        .get(streamsService.getOne)
-        // .post(streamsService.postOne)
-        .put(streamsService.putOne)
-        .delete(streamsService.deleteOne);
+        .get(restService.getOne('Stream'))
+        .put(restService.putOne('Stream'))
+        .delete(restService.deleteOne('Stream'));
+
+    router.route('/events')
+        .get(restService.getAll('Event'))
+        .post(restService.postAll('Event'));
+
+    router.route('/events/:_id')
+        .get(restService.getOne('Event'))
+        .put(restService.putOne('Event'))
+        .delete(restService.deleteOne('Event'));
 
     // configure the server app
     app.use(bodyParser.json());
@@ -41,8 +49,9 @@
 
     app.use(function(req, res) {
         res.status(404).send('<h1>Not Found</h1><p>The requested URL ' + req.url +
-            ' was not found on this server.</p><hr>' +
-            'For the REST service for streams call /api/v1/streams');
+            ' was not found on this server or could not be called with ' + req.method + '</p><hr>' +
+            'For the REST service for streams call /api/v1/streams<br />' +
+            'For the REST service for events call /api/v1/events');
     });
 
     /**

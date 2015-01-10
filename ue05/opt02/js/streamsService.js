@@ -6,13 +6,12 @@
 (function() {
     'use strict';
 
-    // var mongojs = require('mongojs'),
-    //     db = mongojs('mmeDb', ['streams']),
-    ver mongoose = require('mongoose'),
-        db = mongoose.connect('mongodb://localhost/mmeDb'),
-        streams = db.streams,
-        Stream = require('./Stream').Stream,
+    var mongoose = require('mongoose'),
+        conn = mongoose.connect('mongodb://localhost/mmeDb'),
+        ObjectId = mongoose.Types.ObjectId,
+        StreamModel = require('./Stream').StreamModel,
         ServerError = require('./ServerError').ServerError;
+
 
     var streamsService = {};
 
@@ -20,9 +19,9 @@
         streamsService: streamsService
     };
 
-    var toMongoId = function(id, res) {
+    var toMongoId = function(id) {
         try {
-            return mongojs.ObjectId(id);
+            return new ObjectId(id);
         } catch (err) {
             console.log(err);
         }
@@ -31,10 +30,17 @@
     var respondWith = function(res, okStatus, id, callback) {
         return function(err, doc) {
             if (err) {
-                res.status(500).send(new ServerError(err, 500));
+                var errStatus = 500;
+                if (err.name == 'ValidationError') {
+                    errStatus = 400;
+                }
+                res.status(errStatus).send(new ServerError(err, errStatus));
             } else if (!doc) {
                 res.status(404).send(new ServerError('No stream found with ID: ' + id, 404));
             } else if (!callback) {
+                if (okStatus == 204) {
+                    doc = null;
+                }
                 res.status(okStatus || 200).send(doc);
             } else {
                 callback(doc);
@@ -48,7 +54,9 @@
     };
 
     /**
-     * A simple GET sends all streams.
+     * A simple GET responds with all streams, or a filtered list of streams
+     * based on the given query, if a query object was passed.
+     * @param {Number} [req.query] a query object
      */
     streamsService.getAll = function(req, res, next) {
         var reqQuery = req.query,
@@ -56,107 +64,62 @@
         for (var param in reqQuery) {
             dbQuery[param] = parseParam(reqQuery[param]);
         }
-        db.streams.find(dbQuery, respondWith(res, 200));
+        StreamModel.find(dbQuery, respondWith(res, 200));
     };
 
     /**
-     * A GET with an index parameter sends the stream at the specified index
-     * position. If there is no element for the given index value (because it
-     * is a negative number, too large or not numeric) a ServerError will be
-     * sent.
+     * A GET with an ID parameter responds with the specified stream. If no
+     * element with the given ID could be found, this service responds with a
+     * ServerError with status 404.
+     * @param {Number} req.params._id the stream ID
      */
     streamsService.getOne = function(req, res, next) {
-        var id = toMongoId(req.params._id, res);
-        streams.findOne({
-            _id: id
-        }, respondWith(res, 200, id));
+        var id = toMongoId(req.params._id);
+        StreamModel.findById(id, respondWith(res, 200, id));
     };
 
     /**
-     * A simple POST creates a new stream at the end of the list.
+     * A simple POST creates a new stream and sends the updated stream object
+     * in respose. If required attributes were missing, this service responds
+     * with a ServerError with status 400.
+     * @param {Object} req.body the update object
      */
     streamsService.postAll = function(req, res, next) {
-        var newStream;
-        try {
-            newStream = new Stream(req.body);
-        } catch (err) {
-            res.status(400).send(err);
-            return;
-        }
-        streams.save(newStream, respondWith(res, 201));
-    };
-
-    // /**
-    //  * A POST with an index parameter sends a ServerError.
-    //  */
-    // streamsService.postOne = function(req, res, next) {
-    //     res.status(405).send(new ServerError('Not allowed to post to a specified index.', 405));
-    // };
-
-    /**
-     * A simple PUT updates all streams with the array that was passed with the
-     * request.
-     */
-    streamsService.putAll = function(req, res, next) {
-        var newStreams = req.body;
-        if (Object.prototype.toString.call(newStreams) !== '[object Array]') {
-            res.status(400).send(new ServerError('The request body has to be an array.', 400));
-        } else {
-            res.status(400).send(new ServerError('FIXME not implemented (should it be implemented?)', 501));
-
-            // streamData = newStreams;
-            // res.status(201).send(streamData);
-        }
+        var newStream = req.body;
+        StreamModel.create(newStream, respondWith(res, 201));
     };
 
     var hasNoAttributes = function(obj) {
-        return Object.keys(obj).length == 0;
-    }
+        return Object.keys(obj).length === 0;
+    };
 
     /**
-     * A PUT with an index parameter updates the stream with the specified
-     * index. If there is no element for the given value (because it is a
-     * negative number, too large or not numeric) an ServerError will be sent.
+     * A PUT with an ID parameter updates the specified stream and sends the
+     * updated stream object in respose. This service responds with a
+     * ServerError with status 404 if no element with the given ID could
+     * be found, or with 400 if the update object was empty.
+     * @param {Number} req.params._id the stream ID
+     * @param {Object} req.body the update object
      */
     streamsService.putOne = function(req, res, next) {
         var updateObj = req.body,
-            id = toMongoId(req.params._id, res);
+            id = toMongoId(req.params._id);
         if (hasNoAttributes(updateObj)) {
             res.status(400).send(new ServerError('You must specify at least one field to update.', 400));
             return;
         }
-        streams.findAndModify({
-            query: {
-                _id: id
-            },
-            update: {
-                $set: updateObj
-            },
-            new: true
-        }, respondWith(res, 200, id));
+        StreamModel.findByIdAndUpdate(id, updateObj, respondWith(res, 200, id));
     };
 
-    // /**
-    //  * A simple DELETE Deletes all streams.
-    //  */
-    // streamsService.deleteAll = function(req, res, next) {
-    //     streamData = [];
-    //     // res.status(200).send('All streams were successfully deleted.');
-    //     res.status(204).send();
-    // };
-
     /**
-     * A DELETE with an index parameter deletes the stream with the specified
-     * index. If there is no element for the given value (because it is a
-     * negative number, too large or not numeric) an ServerError will be thrown.
+     * A DELETE with an ID parameter deletes the specified stream. If no element
+     * with the given ID could be found, this service responds with a
+     * ServerError with status 404.
+     * @param {Number} req.params._id the stream ID
      */
     streamsService.deleteOne = function(req, res, next) {
-        var id = toMongoId(req.params._id, res);
-        streams.findOne({
-            _id: id
-        }, respondWith(res, 0, id, function(doc) {
-            streams.remove(doc, respondWith(res, 204));
-        }));
+        var id = toMongoId(req.params._id);
+        StreamModel.findByIdAndRemove(id, respondWith(res, 204, id));
     };
 
 }());

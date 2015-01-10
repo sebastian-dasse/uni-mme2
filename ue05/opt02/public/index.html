@@ -31,17 +31,16 @@
             <label for="inState">State:</label>
             <input id="inState" type="text">
         </p>
+        <div>
+            <button id="btnCreate" type="button">Create</button>
+            <button id="btnUpdate" type="button">Update</button>
+            <button id="btnDelete" type="button">Delete</button>
+        </div>
     </form>
-    <div>
-        <button id="btnCreate">Create</button>
-        <button id="btnUpdate">Update</button>
-        <button id="btnDelete">Delete</button>
-    </div>
 
     <form id="filterForm">
         <p>
             <select id="filterSelect" size="1">
-                <option>ID</option>
                 <option>Name</option>
                 <option>Description</option>
                 <option>URL</option>
@@ -49,12 +48,19 @@
             </select>
             <label for="filterFilter">Filter:</label>
             <input id="filterFilter" type="text">
+            <input id="btnFilter" type="button" value= "Filter" />
+            <input id="btnNoFilter" type="button" value="No Filter" />
         </p>
     </form>
-    <div>
-        <button id="btnFilter">Filter</button>
-        <button id="btnNoFilter">No Filter</button>
-    </div>
+
+    <form id="showForm">
+        <p>
+            <label for="showId">ID:</label>
+            <input id="showId" type="text" />
+            <input id="btnShowOne" type="button" value="Show One By ID" />
+            <input id="btnShowAll" type="button" value="Show All" />
+        </p>
+    </form>
 
 </body>
 </html>

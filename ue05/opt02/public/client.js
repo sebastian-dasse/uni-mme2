@@ -17,6 +17,8 @@
         document.getElementById('btnDelete').addEventListener('click', doDeleteStream);
         document.getElementById('btnFilter').addEventListener('click', filterOn);
         document.getElementById('btnNoFilter').addEventListener('click', filterOff);
+        document.getElementById('btnShowOne').addEventListener('click', showOne);
+        document.getElementById('btnShowAll').addEventListener('click', showAll);
     };
 
     var callHttp = function(method, options, callback) {
@@ -31,16 +33,14 @@
             }
             var responseText = xmlhttp.responseText,
                 response = responseText ? JSON.parse(responseText) : '(no response)';
-            if (xmlhttp.status == okStatus) {
-                if (LOG) {
-                    console.log('%s %s %d (%s) with response:', method, url, xmlhttp.status, xmlhttp.statusText);
-                    console.log(response);
-                }
-                if (callback) {
-                    callback(response);
-                }
-            } else {
+            if (xmlhttp.status != okStatus) {
                 console.error(response);
+            } else if (LOG) {
+                console.log('%s %s %d (%s) with response:', method, url, xmlhttp.status, xmlhttp.statusText);
+                console.log(response);
+            }
+            if (callback) {
+                callback(response);
             }
         };
         xmlhttp.open(method, url, true);
@@ -63,55 +63,79 @@
             var item = list[i],
                 row = table.insertRow(-1),
                 j = 0;
-            for (var attr in item) {
-                row.insertCell(j).innerHTML = item[attr];
-                j++;
-            }
+            // for (var attr in item) {
+            //     row.insertCell(j).innerHTML = item[attr];
+            //     j++;
+            // }
+
+            row.insertCell(0).innerHTML = item._id;
+            row.insertCell(1).innerHTML = item.name;
+            row.insertCell(2).innerHTML = item.description;
+            row.insertCell(3).innerHTML = item.url;
+            row.insertCell(4).innerHTML = item.state;
         }
+    };
+
+    var refreshTable = function(tableId, list) {
+        var table = document.getElementById(tableId);
+        clearTable(table);
+        fillTable(table, list);
     };
 
     var getAllStreams = function() {
         callHttp('GET', {
             query: queryString
         }, function(streams) {
-            var streamsTable = document.getElementById('streams');
-            clearTable(streamsTable);
-            fillTable(streamsTable, streams);
+            refreshTable('streams', streams);
+        });
+    };
+
+    var getOneStream = function(id) {
+        callHttp('GET', {
+            id: id
+        }, function(stream) {
+            refreshTable('streams', [stream]);
         });
     };
 
     var clearForm = function(form) {
         var formElements = document.forms[form].elements;
         for (var i = 0, len = formElements.length; i < len; i++) {
-            formElements[i].value = '';
+            if (formElements[i].type == 'text') {
+                formElements[i].value = '';
+            } else if (formElements[i].type == 'select-one') {
+                formElements[i].selectedIndex = 0;
+            }
         }
     };
 
-    var refreshView = function() {
-        getAllStreams();
-        clearForm('inForm');
+    var refreshViewAndClear = function(formName) {
+        return function() {
+            getAllStreams();
+            clearForm(formName);
+        };
     };
 
-    var postStream = function(stream) {
-        callHttp('POST', {
-            reqBody: stream,
-            okStatus: 201
-        }, refreshView);
-    };
+    // var postStream = function(stream) {
+    //     callHttp('POST', {
+    //         reqBody: stream,
+    //         okStatus: 201
+    //     }, refreshViewAndClear('inForm'));
+    // };
 
-    var putStream = function(id, stream) {
-        callHttp('PUT', {
-            id: id,
-            reqBody: stream
-        }, refreshView);
-    };
+    // var putStream = function(id, stream) {
+    //     callHttp('PUT', {
+    //         id: id,
+    //         reqBody: stream
+    //     }, refreshViewAndClear('inForm'));
+    // };
 
-    var deleteStream = function(id) {
-        callHttp('DELETE', {
-            id: id,
-            okStatus: 204
-        }, refreshView);
-    };
+    // var deleteStream = function(id) {
+    //     callHttp('DELETE', {
+    //         id: id,
+    //         okStatus: 204
+    //     }, refreshViewAndClear('inForm'));
+    // };
 
     var capitalizeFirstChar = function(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -143,17 +167,24 @@
     };
 
     var doCreateStream = function() {
-        postStream(createObjFromInputForm());
+        callHttp('POST', {
+            reqBody: createObjFromInputForm(),
+            okStatus: 201
+        }, refreshViewAndClear('inForm'));
     };
 
     var doUpdateStream = function() {
-        var id = document.forms.inForm.elements.inId.value;
-        putStream(id, createObjFromInputForm());
+        callHttp('PUT', {
+            id: document.forms.inForm.elements.inId.value,
+            reqBody: createObjFromInputForm()
+        }, refreshViewAndClear('inForm'));
     };
 
     var doDeleteStream = function() {
-        var id = document.forms.inForm.elements.inId.value;
-        deleteStream(id);
+        callHttp('DELETE', {
+            id: document.forms.inForm.elements.inId.value,
+            okStatus: 204
+        }, refreshViewAndClear('inForm'));
     };
 
     var createQueryFromFilterForm = function() {
@@ -183,6 +214,15 @@
         clearForm('filterForm');
         clearQuery();
         getAllStreams();
+    };
+
+    var showOne = function() {
+        var id = document.forms.showForm.elements.showId.value;
+        getOneStream(id);
+    };
+
+    var showAll = function() {
+        refreshViewAndClear('showForm')();
     };
 
 }());

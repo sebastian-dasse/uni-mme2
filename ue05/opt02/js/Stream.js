@@ -6,7 +6,8 @@
 (function() {
     'use strict';
 
-    var ServerError = require('./ServerError').ServerError;
+    var mongoose = require('mongoose'),
+        ServerError = require('./ServerError').ServerError;
 
     /**
      * Constructs a Stream object with ... and optional...
@@ -33,8 +34,33 @@
         });
     };
 
+    var Schema = require('mongoose').Schema,
+        ObjectId = Schema.ObjectId;
+
+    var StreamSchema = new Schema({
+        name: {
+            type: String,
+            required: '{NAME} is required!'
+        },
+        description: {
+            type: String,
+            default: ''
+        },
+        url: {
+            type: String,
+            required: '{URL} is required!'
+        },
+        state: {
+            type: Number,
+            default: 0
+        }
+    });
+    var StreamModel = mongoose.model('Stream', StreamSchema);
+
     module.exports = {
-        Stream: Stream
+        Stream: Stream,
+        // StreamSchema: StreamSchema
+        StreamModel: StreamModel
     };
 
 }());

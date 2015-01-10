@@ -7,9 +7,12 @@
     'use strict';
 
     // dependencies
-    var mongojs = require('mongojs'),
-        db = mongojs('mmeDb', ['streams']),
-        streams = db.streams;
+    var mongoose = require('mongoose'),
+        conn = mongoose.connect('mongodb://localhost/mmeDb'),
+        // streams = db.streams; //  --> replace with mongoose.model
+        // StreamSchema = require('../js/Stream').StreamSchema,
+        // StreamModel = mongoose.model('Stream', StreamSchema);
+        StreamModel = require('../js/Stream').StreamModel;
 
     // some dummy data
     var createStreams = function() {
@@ -32,20 +35,26 @@
     };
 
     var initializeDb = function(whenDoneExec, log) {
-        streams.drop(function() {
-            streams.insert(createStreams(), function(err, doc) {
+        mongoose.connection.collections['streams' /*, 'somes'*/ ].drop(function() {
+            StreamModel.create(createStreams(), function(err, doc) {
                 if (err) {
                     console.error('Could not initialize DB.'); // TODO should throw error
                     console.error(err);
                 }
+            }).then(function() {
                 if (log) {
-                    console.log('Initialized DB with some dummy data (' + doc.length + ' documents).');
+                    console.log('Initialized DB with some dummy data (' + arguments.length + ' documents).');
                 }
                 if (whenDoneExec) {
                     whenDoneExec();
                 }
             });
+            // SomeModel.create({
+            //     name: 'Karl',
+            //     extra: 'this is extra'
+            // });
         });
+
     };
 
     module.exports = {
@@ -72,7 +81,7 @@
      */
     if (runOption) {
         initializeDb(function() {
-            db.close(); // QUESTION is it ok to do this?
+            conn.disconnect(); // QUESTION is it ok to do this?
         }, logOption);
     }
 

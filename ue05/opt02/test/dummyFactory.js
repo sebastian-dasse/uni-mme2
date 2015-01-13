@@ -9,8 +9,8 @@
     // dependencies
     var mongoose = require('mongoose'),
         conn = mongoose.connect('mongodb://localhost/mmeDb'),
-        StreamModel = require('../js/models/Stream').StreamModel,
-        EventModel = require('../js/models/Event').EventModel;
+        StreamModel = require('../js/models/Stream'),
+        EventModel = require('../js/models/Event');
 
     // some dummy data
     var createStreams = function() {

@@ -9,9 +9,9 @@
     var mongoose = require('mongoose'),
         conn = mongoose.connect('mongodb://localhost/mmeDb'),
         ObjectId = mongoose.Types.ObjectId,
-        StreamModel = require('./models/Stream').StreamModel,
-        EventModel = require('./models/Event').EventModel,
-        ServerError = require('./ServerError').ServerError;
+        StreamModel = require('./models/Stream'),
+        EventModel = require('./models/Event'),
+        ServerError = require('./ServerError');
 
     var models = {
         Stream: StreamModel,
@@ -19,7 +19,7 @@
     };
 
     var restService = {};
-    module.exports.restService = restService;
+    module.exports = restService;
 
     var respondWith = function(res, okStatus, id, callback) {
         return function(err, doc) {

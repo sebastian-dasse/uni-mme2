@@ -1,313 +1,313 @@
-describe('The streams module', function() {
-    'use strict';
+// describe('The streams module', function() {
+//     'use strict';
 
-    var streamsService = require('../streamsService').streamsService,
-        dummyStreamData = [];
+//     var streamsService = require('../streamsService').streamsService,
+//         dummyStreamData = [];
 
-    // returns a fresh array of dummy data
-    var produceDummyData = function() {
-        var dummy = [{
-            data: 'foo'
-        }, {
-            data: 'bar'
-        }, {
-            data: 'baz'
-        }];
-        return dummy;
-        // return dummy.slice();
-    };
-
-
-    beforeEach(function() {
-        dummyStreamData = produceDummyData();
-        streamsService.setData(dummyStreamData);
-    });
-
-    afterEach(function() {
-        // streamsService.setData([])
-    });
+//     // returns a fresh array of dummy data
+//     var produceDummyData = function() {
+//         var dummy = [{
+//             data: 'foo'
+//         }, {
+//             data: 'bar'
+//         }, {
+//             data: 'baz'
+//         }];
+//         return dummy;
+//         // return dummy.slice();
+//     };
 
 
-    var expectInvalidIndicesToProcuceErrorFor = function(fn) {
-        return function(index) {
-            fn({
-                params: {
-                    index: index
-                }
-            }, {
-                status: function(code) {
-                    expect(code).toBe(404);
-                    return {
-                        send: function(data) {
-                            expect(data.type).toBe('ServerError');
-                            expect(data.statusCode).toBe(404);
-                        }
-                    };
-                }
-            });
-        };
-    };
+//     beforeEach(function() {
+//         dummyStreamData = produceDummyData();
+//         streamsService.setData(dummyStreamData);
+//     });
 
-    var expectEmptyBodyToProduceErrorFor = function(fn, params) {
-        fn({
-            body: undefined,
-            params: params // optional
-        }, {
-            status: function(code) {
-                expect(code).toBe(400);
-                return {
-                    send: function(data) {
-                        expect(data.type).toBe('ServerError');
-                        expect(data.statusCode).toBe(400);
-                    }
-                };
-            }
-        });
-    };
+//     afterEach(function() {
+//         // streamsService.setData([])
+//     });
 
 
-    it('should export dependencies', function() {
-        expect(streamsService.getAll).toBeDefined();
-        expect(streamsService.getOne).toBeDefined();
-        expect(streamsService.postAll).toBeDefined();
-        // expect(streamsService.postOne).toBeDefined();
-        expect(streamsService.putAll).toBeDefined();
-        expect(streamsService.putOne).toBeDefined();
-        // expect(streamsService.deleteAll).toBeDefined();
-        expect(streamsService.deleteOne).toBeDefined();
-        expect(streamsService.setData).toBeDefined();
-        expect(streamsService.getData).toBeDefined();
-    });
+//     var expectInvalidIndicesToProcuceErrorFor = function(fn) {
+//         return function(index) {
+//             fn({
+//                 params: {
+//                     index: index
+//                 }
+//             }, {
+//                 status: function(code) {
+//                     expect(code).toBe(404);
+//                     return {
+//                         send: function(data) {
+//                             expect(data.type).toBe('ServerError');
+//                             expect(data.statusCode).toBe(404);
+//                         }
+//                     };
+//                 }
+//             });
+//         };
+//     };
 
-    it('should have an array of streams', function() {
-        expect(Object.prototype.toString.call(streamsService.getData())).toEqual('[object Array]');
-    });
+//     var expectEmptyBodyToProduceErrorFor = function(fn, params) {
+//         fn({
+//             body: undefined,
+//             params: params // optional
+//         }, {
+//             status: function(code) {
+//                 expect(code).toBe(400);
+//                 return {
+//                     send: function(data) {
+//                         expect(data.type).toBe('ServerError');
+//                         expect(data.statusCode).toBe(400);
+//                     }
+//                 };
+//             }
+//         });
+//     };
 
-    describe('getAll', function() {
 
-        it('should send all streams', function() {
-            streamsService.getAll({
-                query: {}
-            }, {
-                send: function(sentData) {
-                    expect(sentData).toEqual(dummyStreamData);
-                }
-            });
-        });
+//     it('should export dependencies', function() {
+//         expect(streamsService.getAll).toBeDefined();
+//         expect(streamsService.getOne).toBeDefined();
+//         expect(streamsService.postAll).toBeDefined();
+//         // expect(streamsService.postOne).toBeDefined();
+//         expect(streamsService.putAll).toBeDefined();
+//         expect(streamsService.putOne).toBeDefined();
+//         // expect(streamsService.deleteAll).toBeDefined();
+//         expect(streamsService.deleteOne).toBeDefined();
+//         expect(streamsService.setData).toBeDefined();
+//         expect(streamsService.getData).toBeDefined();
+//     });
 
-    });
+//     it('should have an array of streams', function() {
+//         expect(Object.prototype.toString.call(streamsService.getData())).toEqual('[object Array]');
+//     });
 
-    describe('getOne', function() {
+//     describe('getAll', function() {
 
-        it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(streamsService.getOne);
-            test(-1);
-            test(10000);
-            test('abc');
-        });
+//         it('should send all streams', function() {
+//             streamsService.getAll({
+//                 query: {}
+//             }, {
+//                 send: function(sentData) {
+//                     expect(sentData).toEqual(dummyStreamData);
+//                 }
+//             });
+//         });
 
-        it('should send the stream at the specified index position', function() {
-            streamsService.getOne({
-                params: {
-                    index: 0
-                }
-            }, {
-                send: function(sentData) {
-                    expect(sentData).toEqual(dummyStreamData[0]);
-                }
-            });
-        });
+//     });
 
-    });
+//     describe('getOne', function() {
 
-    describe('postAll', function() {
+//         it('should reject invalid indices', function() {
+//             var test = expectInvalidIndicesToProcuceErrorFor(streamsService.getOne);
+//             test(-1);
+//             test(10000);
+//             test('abc');
+//         });
 
-        it('should reject a request with an empty body', function() {
-            expectEmptyBodyToProduceErrorFor(streamsService.postAll);
-        });
+//         it('should send the stream at the specified index position', function() {
+//             streamsService.getOne({
+//                 params: {
+//                     index: 0
+//                 }
+//             }, {
+//                 send: function(sentData) {
+//                     expect(sentData).toEqual(dummyStreamData[0]);
+//                 }
+//             });
+//         });
 
-        it('should create a new stream at the end of the list', function() {
-            var originalLength = streamsService.getData().length,
-                newElement = {
-                    data: 'fresh'
-                };
+//     });
 
-            streamsService.postAll({
-                body: newElement
-            }, {
-                status: function(code) {
-                    expect(code).toBe(201);
-                    return {
-                        send: function(setData) {
-                            expect(setData).toEqual(newElement);
-                        }
-                    };
-                }
-            });
+//     describe('postAll', function() {
 
-            var actual = streamsService.getData();
-            expect(actual.length).toBe(originalLength + 1);
-            expect(actual[actual.length - 1]).toEqual(newElement);
-        });
+//         it('should reject a request with an empty body', function() {
+//             expectEmptyBodyToProduceErrorFor(streamsService.postAll);
+//         });
 
-    });
+//         it('should create a new stream at the end of the list', function() {
+//             var originalLength = streamsService.getData().length,
+//                 newElement = {
+//                     data: 'fresh'
+//                 };
 
-    // describe('postOne', function() {
+//             streamsService.postAll({
+//                 body: newElement
+//             }, {
+//                 status: function(code) {
+//                     expect(code).toBe(201);
+//                     return {
+//                         send: function(setData) {
+//                             expect(setData).toEqual(newElement);
+//                         }
+//                     };
+//                 }
+//             });
 
-    //     it('should not be allowed', function() {
-    //         streamsService.postOne({}, {
-    //             status: function(code) {
-    //                 expect(code).toBe(405);
-    //                 return {
-    //                     send: function(sentData) {
-    //                         expect(sentData.type).toBe('ServerError');
-    //                         expect(sentData.statusCode).toBe(405);
-    //                     }
-    //                 };
-    //             }
-    //         });
-    //     });
+//             var actual = streamsService.getData();
+//             expect(actual.length).toBe(originalLength + 1);
+//             expect(actual[actual.length - 1]).toEqual(newElement);
+//         });
 
-    // });
+//     });
 
-    describe('putAll', function() {
+//     // describe('postOne', function() {
 
-        it('should only accept an array', function() {
-            streamsService.putAll({
-                body: 'no array'
-            }, {
-                status: function(code) {
-                    expect(code).toBe(400);
-                    return {
-                        send: function(sentData) {
-                            expect(sentData.type).toBe('ServerError');
-                            expect(sentData.statusCode).toBe(400);
-                        }
-                    };
-                }
-            });
-        });
+//     //     it('should not be allowed', function() {
+//     //         streamsService.postOne({}, {
+//     //             status: function(code) {
+//     //                 expect(code).toBe(405);
+//     //                 return {
+//     //                     send: function(sentData) {
+//     //                         expect(sentData.type).toBe('ServerError');
+//     //                         expect(sentData.statusCode).toBe(405);
+//     //                     }
+//     //                 };
+//     //             }
+//     //         });
+//     //     });
 
-        it('should update the list with the passed array', function() {
-            var newList = [{
-                data: 'fresh'
-            }];
+//     // });
 
-            streamsService.putAll({
-                body: newList
-            }, {
-                status: function(code) {
-                    expect(code).toBe(201);
-                    return {
-                        send: function(sentData) {
-                            expect(sentData).toEqual(newList);
-                        }
-                    };
-                }
-            });
+//     describe('putAll', function() {
 
-            expect(streamsService.getData()).toBe(newList);
-        });
+//         it('should only accept an array', function() {
+//             streamsService.putAll({
+//                 body: 'no array'
+//             }, {
+//                 status: function(code) {
+//                     expect(code).toBe(400);
+//                     return {
+//                         send: function(sentData) {
+//                             expect(sentData.type).toBe('ServerError');
+//                             expect(sentData.statusCode).toBe(400);
+//                         }
+//                     };
+//                 }
+//             });
+//         });
 
-    });
+//         it('should update the list with the passed array', function() {
+//             var newList = [{
+//                 data: 'fresh'
+//             }];
 
-    describe('putOne', function() {
+//             streamsService.putAll({
+//                 body: newList
+//             }, {
+//                 status: function(code) {
+//                     expect(code).toBe(201);
+//                     return {
+//                         send: function(sentData) {
+//                             expect(sentData).toEqual(newList);
+//                         }
+//                     };
+//                 }
+//             });
 
-        it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(streamsService.putOne);
-            test(-1);
-            test(10000);
-            test('abc');
-        });
+//             expect(streamsService.getData()).toBe(newList);
+//         });
 
-        it('should reject a request with an empty body', function() {
-            expectEmptyBodyToProduceErrorFor(streamsService.putOne, {
-                index: 0
-            });
-        });
+//     });
 
-        it('should not modify the total number of streams', function() {
-            var originalLength = streamsService.getData().length;
+//     describe('putOne', function() {
 
-            streamsService.putOne({
-                body: {},
-                params: {
-                    index: 0
-                }
-            }, {
-                send: function() {}
-            });
+//         it('should reject invalid indices', function() {
+//             var test = expectInvalidIndicesToProcuceErrorFor(streamsService.putOne);
+//             test(-1);
+//             test(10000);
+//             test('abc');
+//         });
 
-            expect(streamsService.getData().length).toBe(originalLength);
-        });
+//         it('should reject a request with an empty body', function() {
+//             expectEmptyBodyToProduceErrorFor(streamsService.putOne, {
+//                 index: 0
+//             });
+//         });
 
-        it('should update the stream at the specified index position', function() {
-            var pos = 0,
-                newElement = {
-                    "data": "fresh"
-                };
+//         it('should not modify the total number of streams', function() {
+//             var originalLength = streamsService.getData().length;
 
-            streamsService.putOne({
-                body: newElement,
-                params: {
-                    index: pos
-                }
-            }, {
-                send: function() {}
-            });
+//             streamsService.putOne({
+//                 body: {},
+//                 params: {
+//                     index: 0
+//                 }
+//             }, {
+//                 send: function() {}
+//             });
 
-            expect(streamsService.getData()[pos]).toEqual(newElement);
-        });
+//             expect(streamsService.getData().length).toBe(originalLength);
+//         });
 
-    });
+//         it('should update the stream at the specified index position', function() {
+//             var pos = 0,
+//                 newElement = {
+//                     "data": "fresh"
+//                 };
 
-    // describe('deleteAll', function() {
+//             streamsService.putOne({
+//                 body: newElement,
+//                 params: {
+//                     index: pos
+//                 }
+//             }, {
+//                 send: function() {}
+//             });
 
-    //     it('should delete all streams', function() {
-    //         streamsService.deleteAll({}, {
-    //             status: function(code) {
-    //                 expect(code).toBe(204);
-    //                 return {
-    //                     send: function() {}
-    //                 };
-    //             }
-    //         });
+//             expect(streamsService.getData()[pos]).toEqual(newElement);
+//         });
 
-    //         expect(streamsService.getData().length).toBe(0);
-    //     });
+//     });
 
-    // });
+//     // describe('deleteAll', function() {
 
-    describe('deleteOne', function() {
+//     //     it('should delete all streams', function() {
+//     //         streamsService.deleteAll({}, {
+//     //             status: function(code) {
+//     //                 expect(code).toBe(204);
+//     //                 return {
+//     //                     send: function() {}
+//     //                 };
+//     //             }
+//     //         });
 
-        it('should reject invalid indices', function() {
-            var test = expectInvalidIndicesToProcuceErrorFor(streamsService.getOne);
-            test(-1);
-            test(10000);
-            test('abc');
-        });
+//     //         expect(streamsService.getData().length).toBe(0);
+//     //     });
 
-        it('should delete the stream with the specified index position', function() {
-            var pos = 0,
-                elementToDelete = dummyStreamData[0];
+//     // });
 
-            streamsService.deleteOne({
-                params: {
-                    index: pos
-                }
-            }, {
-                status: function(code) {
-                    expect(code).toBe(204);
-                    return {
-                        send: function() {}
-                    };
-                }
-            });
+//     describe('deleteOne', function() {
 
-            var actual = streamsService.getData();
-            expect(actual[pos]).toBeUndefined();
-        });
+//         it('should reject invalid indices', function() {
+//             var test = expectInvalidIndicesToProcuceErrorFor(streamsService.getOne);
+//             test(-1);
+//             test(10000);
+//             test('abc');
+//         });
 
-    });
+//         it('should delete the stream with the specified index position', function() {
+//             var pos = 0,
+//                 elementToDelete = dummyStreamData[0];
 
-});
+//             streamsService.deleteOne({
+//                 params: {
+//                     index: pos
+//                 }
+//             }, {
+//                 status: function(code) {
+//                     expect(code).toBe(204);
+//                     return {
+//                         send: function() {}
+//                     };
+//                 }
+//             });
+
+//             var actual = streamsService.getData();
+//             expect(actual[pos]).toBeUndefined();
+//         });
+
+//     });
+
+// });

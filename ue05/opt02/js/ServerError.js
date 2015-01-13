@@ -17,8 +17,6 @@
         };
     };
 
-    module.exports = {
-        ServerError: ServerError
-    };
+    module.exports = ServerError;
 
 }());

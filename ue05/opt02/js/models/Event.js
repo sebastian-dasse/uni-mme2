@@ -25,6 +25,6 @@
         }]
     });
 
-    module.exports.EventModel = mongoose.model('Event', EventSchema);
+    module.exports = mongoose.model('Event', EventSchema);
 
 }());

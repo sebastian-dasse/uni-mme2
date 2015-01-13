@@ -8,12 +8,12 @@
 
     window.onload = function() {
         addEventListeners();
-        getAllStreams();
+        doGetAllStreams();
     };
 
     var addEventListeners = function() {
-        document.getElementById('btnCreate').addEventListener('click', doCreateStream);
-        document.getElementById('btnUpdate').addEventListener('click', doUpdateStream);
+        document.getElementById('btnCreate').addEventListener('click', doPostStream);
+        document.getElementById('btnUpdate').addEventListener('click', doPutStream);
         document.getElementById('btnDelete').addEventListener('click', doDeleteStream);
         document.getElementById('btnFilter').addEventListener('click', filterOn);
         document.getElementById('btnNoFilter').addEventListener('click', filterOff);
@@ -82,7 +82,7 @@
         fillTable(table, list);
     };
 
-    var getAllStreams = function() {
+    var doGetAllStreams = function() {
         callHttp('GET', {
             query: queryString
         }, function(streams) {
@@ -90,7 +90,7 @@
         });
     };
 
-    var getOneStream = function(id) {
+    var doGetOneStream = function(id) {
         callHttp('GET', {
             id: id
         }, function(stream) {
@@ -111,31 +111,10 @@
 
     var refreshViewAndClear = function(formName) {
         return function() {
-            getAllStreams();
+            doGetAllStreams();
             clearForm(formName);
         };
     };
-
-    // var postStream = function(stream) {
-    //     callHttp('POST', {
-    //         reqBody: stream,
-    //         okStatus: 201
-    //     }, refreshViewAndClear('inForm'));
-    // };
-
-    // var putStream = function(id, stream) {
-    //     callHttp('PUT', {
-    //         id: id,
-    //         reqBody: stream
-    //     }, refreshViewAndClear('inForm'));
-    // };
-
-    // var deleteStream = function(id) {
-    //     callHttp('DELETE', {
-    //         id: id,
-    //         okStatus: 204
-    //     }, refreshViewAndClear('inForm'));
-    // };
 
     var capitalizeFirstChar = function(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -166,14 +145,14 @@
         return obj;
     };
 
-    var doCreateStream = function() {
+    var doPostStream = function() {
         callHttp('POST', {
             reqBody: createObjFromInputForm(),
             okStatus: 201
         }, refreshViewAndClear('inForm'));
     };
 
-    var doUpdateStream = function() {
+    var doPutStream = function() {
         callHttp('PUT', {
             id: document.forms.inForm.elements.inId.value,
             reqBody: createObjFromInputForm()
@@ -207,18 +186,18 @@
 
     var filterOn = function() {
         setQuery();
-        getAllStreams();
+        doGetAllStreams();
     };
 
     var filterOff = function() {
         clearForm('filterForm');
         clearQuery();
-        getAllStreams();
+        doGetAllStreams();
     };
 
     var showOne = function() {
         var id = document.forms.showForm.elements.showId.value;
-        getOneStream(id);
+        doGetOneStream(id);
     };
 
     var showAll = function() {

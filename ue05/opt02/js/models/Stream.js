@@ -28,8 +28,6 @@
         }
     });
 
-    module.exports = {
-        StreamModel: mongoose.model('Stream', StreamSchema)
-    };
+    module.exports = mongoose.model('Stream', StreamSchema);
 
 }());

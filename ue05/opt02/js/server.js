@@ -11,9 +11,7 @@
         bodyParser = require('body-parser'),
         app = express(),
         router = express.Router(),
-        restService = require('./restService').restService
-        //, eventsService = require('./eventsService').eventsService
-    ;
+        restService = require('./restService');
 
     /**
      * Logs some parameters of every HTTP request.

@@ -153,34 +153,4 @@
         }));
     };
 
-    /**
-     * TODO remove if unused
-     *
-     * Sets the stream data.
-     */
-    streamsService.setData = function(newData) {
-        // streamData = newData;
-
-        streams.drop();
-        newData.forEach(function(element) {
-            streams.save(element);
-        });
-    };
-
-    /**
-     * TODO remove if unused
-     *
-     * Gets the stream data.
-     */
-    streamsService.getData = function() {
-        // return streamData;
-
-        streams.find(function(err, docs) {
-            if (err) {
-                console.log(err);
-            }
-            return docs; // FIXME broken, returns undefined
-        });
-    };
-
 }());

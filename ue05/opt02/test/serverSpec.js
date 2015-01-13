@@ -2,7 +2,6 @@ describe('The server module', function() {
     'use strict';
 
     var request = require('request'),
-        // restService = require('../js/restService').restService,
         dummyFactory = require('./dummyFactory'),
         url = 'http://localhost:8000/api/v1/streams/';
 

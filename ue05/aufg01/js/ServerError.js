@@ -11,7 +11,7 @@
      */
     var ServerError = function(msg, status) {
         return {
-            type: 'ServerError',
+            type: 'error',
             statusCode: status || 404,
             msg: msg || 'Requested resource not found.'
         };

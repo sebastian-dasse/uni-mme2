@@ -1,5 +1,7 @@
 /**
- * A simple REST server for the entities "stream" and "event".
+ * A simple REST server
+ for the entities "stream"
+ and "event".
  *
  * @author Sebastian Dass&eacute;
  */
@@ -57,8 +59,9 @@
      *
      * @return {Function} the server
      */
-    var serve = function() {
-        var server = app.listen(8000, function() {
+    var serve = function(port) {
+        port = port || 8000;
+        var server = app.listen(port, function() {
             var host = server.address().address;
             var port = server.address().port;
             console.log('Serving at http://%s:%s', host, port);

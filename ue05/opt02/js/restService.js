@@ -98,6 +98,7 @@
         var Model = models[modelName];
         return function(req, res, next) {
             var newStream = req.body;
+            console.log(newStream)
             Model.create(newStream, respondWith(res, 201));
         };
     };

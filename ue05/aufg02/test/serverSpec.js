@@ -37,7 +37,7 @@ describe('The server module', function() {
                 options.url = url + id;
                 fn(options, function(err, response, body) {
                     expect(response.statusCode).toBe(404);
-                    expect(body.type).toEqual('ServerError');
+                    expect(body.type).toEqual('error');
                     numCalls++;
                     if (numCalls == arr.length) {
                         done();
@@ -121,7 +121,7 @@ describe('The server module', function() {
         //             body: {}
         //         }, function(err, response, body) {
         //             expect(response.statusCode).toBe(405);
-        //             expect(body.type).toEqual('ServerError');
+        //             expect(body.type).toEqual('error');
         //             done();
         //         });
         //     });
@@ -137,7 +137,7 @@ describe('The server module', function() {
         //             body: 'no array'
         //         }, function(err, response, body) {
         //             expect(response.statusCode).toBe(400);
-        //             expect(body.type).toEqual('ServerError');
+        //             expect(body.type).toEqual('error');
         //             done();
         //         });
         //     });
@@ -294,7 +294,7 @@ describe('The server module', function() {
                             json: true
                         }, function(err, response, body) {
                             expect(response.statusCode).toBe(404);
-                            expect(body.type).toEqual('ServerError');
+                            expect(body.type).toEqual('error');
                             done();
                         });
                     });

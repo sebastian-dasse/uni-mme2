@@ -39,4 +39,4 @@ To fill the database with some dummy data:
     mongod
 
 # in another console:
-    node ./test/dummyStreamsFactory.js --run
+    node ./test/dummyFactory.js --run

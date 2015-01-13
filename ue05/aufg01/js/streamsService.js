@@ -48,7 +48,7 @@
             dbQuery = {};
         for (var param in reqQuery) {
             var value = reqQuery[param];
-            dbQuery[param] = isNaN(value) ? new RegExp(value) : parseInt(value);
+            dbQuery[param] = isNaN(value) ? new RegExp(value, 'i') : parseInt(value);
         }
         db.streams.find(dbQuery, respondWith(res, 200));
     };

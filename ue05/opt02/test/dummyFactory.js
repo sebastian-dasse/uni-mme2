@@ -78,7 +78,7 @@
 
     /**
      * Run from the command line like this:
-     *      node ./test/dummyStreamsFactory.js --run
+     *      node ./test/dummyFactory.js --run
      */
     if (runOption) {
         initializeDb(function() {

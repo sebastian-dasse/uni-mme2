@@ -39,7 +39,7 @@
 //                     expect(code).toBe(404);
 //                     return {
 //                         send: function(data) {
-//                             expect(data.type).toBe('ServerError');
+//                             expect(data.type).toBe('error');
 //                             expect(data.statusCode).toBe(404);
 //                         }
 //                     };
@@ -57,7 +57,7 @@
 //                 expect(code).toBe(400);
 //                 return {
 //                     send: function(data) {
-//                         expect(data.type).toBe('ServerError');
+//                         expect(data.type).toBe('error');
 //                         expect(data.statusCode).toBe(400);
 //                     }
 //                 };
@@ -160,7 +160,7 @@
 //     //                 expect(code).toBe(405);
 //     //                 return {
 //     //                     send: function(sentData) {
-//     //                         expect(sentData.type).toBe('ServerError');
+//     //                         expect(sentData.type).toBe('error');
 //     //                         expect(sentData.statusCode).toBe(405);
 //     //                     }
 //     //                 };
@@ -180,7 +180,7 @@
 //                     expect(code).toBe(400);
 //                     return {
 //                         send: function(sentData) {
-//                             expect(sentData.type).toBe('ServerError');
+//                             expect(sentData.type).toBe('error');
 //                             expect(sentData.statusCode).toBe(400);
 //                         }
 //                     };

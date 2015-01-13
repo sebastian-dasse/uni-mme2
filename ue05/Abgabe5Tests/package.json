@@ -1,0 +1,14 @@
+{
+  "name": "Abgabe5Tests",
+  "version": "1.0.0",
+  "description": "Tests für die Abgabe der Übung 5",
+  "main": "server.js",
+  "scripts": {
+    "test": "jasmine-node --verbose spec/"
+  },
+  "author": "Sven Spielvogel",
+  "license": "MIT",
+  "dependencies": {
+    "frisby": "^0.8.3"
+  }
+}
